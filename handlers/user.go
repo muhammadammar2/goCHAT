@@ -3,26 +3,31 @@ package handlers
 import (
 	"dummy/models"
 	"net/http"
+	"os"
+	"time"
 
+	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
-var db *gorm.DB
+// var db *gorm.DB
 
-func Signup (c echo.Context) error {
-	user := new (models.User)
-	if err := c.Bind(user); err != nil {
-		return err
-	}
+func Signup (db * gorm.DB) echo.HandlerFunc{
+	return func (c echo.Context) error {
+		user := new(models.User)
+		if err := c.Bind(user); err != nil {
+			return err
+		}
+	
 
-	hash, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+	hashPass, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return err
 	}
 
-	user.Password = string (hash)
+	user.Password = string (hashPass)
     
 	if err := db.Create(user).Error; err != nil {
 		return err
@@ -31,3 +36,36 @@ func Signup (c echo.Context) error {
 	return c.JSON(http.StatusCreated , user)
 }
 
+}
+
+func Login (db * gorm.DB) echo.HandlerFunc {
+	return func (c echo.Context) error  {
+       login := new (models.User)
+	   if err := c.Bind(login); err != nil {
+		return err
+	   }
+
+	   user := new (models.User)
+	   if err := db.Where("email = ?" , login.Email).First(user).Error; err != nil {
+		return echo.ErrUnauthorized
+	   }
+	   if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(login.Password)); err != nil {
+		  return echo.ErrUnauthorized
+	   }
+
+	   token := jwt.NewWithClaims(jwt.SigningMethodHS256 , jwt.MapClaims{
+		"email" : user.Email,
+		"exp" : time.Now().Add(time.Hour * 24).Unix(),
+	   })
+
+	   tokenString , err := token.SignedString([] byte (os.Getenv("JWT_SECRET")))
+	   if err != nil {
+		return err
+	   }
+
+	   return c.JSON(http.StatusOK , echo.Map {
+		"token" : tokenString,
+	   })
+	}
+
+}
