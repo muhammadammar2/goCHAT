@@ -69,3 +69,27 @@ func Login (db * gorm.DB) echo.HandlerFunc {
 	}
 
 }
+
+func DeleteAccount(db *gorm.DB) echo.HandlerFunc {
+    return func(c echo.Context) error {
+        user := c.Get("user").(*jwt.Token)
+        claims, ok := user.Claims.(jwt.MapClaims)
+        if !ok {
+            return echo.ErrUnauthorized
+        }
+
+        email, ok := claims["email"].(string)
+        if !ok {
+            return echo.ErrUnauthorized
+        }
+
+        if err := db.Where("email = ?", email).Delete(&models.User{}).Error; err != nil {
+            return echo.ErrInternalServerError
+        }
+
+        return c.JSON(http.StatusOK, echo.Map{
+            "message": "Account deleted successfully",
+        })
+    }
+}
+
