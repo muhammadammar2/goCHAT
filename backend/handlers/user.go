@@ -12,7 +12,6 @@ import (
 	"gorm.io/gorm"
 )
 
-// var db *gorm.DB
 
 func Signup (db * gorm.DB) echo.HandlerFunc{
 	return func (c echo.Context) error {

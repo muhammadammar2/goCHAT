@@ -71,7 +71,6 @@ func main() {
 	e.POST("/login", handlers.Login(db))
 	e.POST("/logout" , handlers.Logout())
 
-	// Create a group for protected routes
 	r := e.Group("")
 	r.Use(jwtMiddleware)
 	r.DELETE("/delete", handlers.DeleteAccount(db))
