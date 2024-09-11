@@ -29,8 +29,6 @@ func main() {
     dbPort := os.Getenv("DB_PORT")
     dbName := os.Getenv("DB_NAME")
 	
-	// dsn := "root:123@tcp(127.0.0.1:3306)/goo?charset=utf8mb4&parseTime=True&loc=Local"
-
 	 dsn := dbUser + ":" + dbPassword + "@tcp(" + dbHost + ":" + dbPort + ")/" + dbName + "?charset=utf8mb4&parseTime=True&loc=Local"
 
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
@@ -49,16 +47,29 @@ func main() {
 		log.Fatalf("JWT_SECRET not set in .env file")
 	}
 
+	// jwtMiddleware := echojwt.WithConfig(echojwt.Config{
+	// 	SigningKey: []byte(jwtSecret),
+	// 	ErrorHandler: func(c echo.Context, err error) error {
+	// 		log.Printf("JWT Error: %v", err)
+	// 		return echo.ErrUnauthorized
+	// 	},
+	// })
 	jwtMiddleware := echojwt.WithConfig(echojwt.Config{
-        SigningKey: jwtSecret,
-        ErrorHandler: func(c echo.Context, err error) error {
-            log.Printf("JWT Error: %v", err)
-            return echo.ErrUnauthorized
-        },
-    })
+		SigningKey:    []byte(jwtSecret),
+		TokenLookup:   "header:Authorization",
+		ContextKey:    "user", 
+		ErrorHandler: func(c echo.Context, err error) error {
+			log.Printf("JWT Error: %v", err)
+			return echo.ErrUnauthorized
+		},
+	})
+	
+	
+		
 
 	e.POST("/signup", handlers.Signup(db))
 	e.POST("/login", handlers.Login(db))
+	e.POST("/logout" , handlers.Logout())
 
 	// Create a group for protected routes
 	r := e.Group("")

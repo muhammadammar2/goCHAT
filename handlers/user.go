@@ -93,3 +93,12 @@ func DeleteAccount(db *gorm.DB) echo.HandlerFunc {
     }
 }
 
+
+func Logout() echo.HandlerFunc {
+    return func(c echo.Context) error {
+        return c.JSON(http.StatusOK, echo.Map{
+            "message": "Logout successful. clear your token on the client side",
+        })
+    }
+}
+
