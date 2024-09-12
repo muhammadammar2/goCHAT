@@ -68,7 +68,7 @@ func Login (db * gorm.DB) echo.HandlerFunc {
 	}
 
 }
-
+ // not working bcs of the jwt
 func DeleteAccount(db *gorm.DB) echo.HandlerFunc {
     return func(c echo.Context) error {
         user := c.Get("user").(*jwt.Token)
