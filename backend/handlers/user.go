@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"dummy/models"
+	"log"
 	"net/http"
 	"os"
 	"time"
@@ -54,13 +55,15 @@ func Login (db * gorm.DB) echo.HandlerFunc {
 
 	   token := jwt.NewWithClaims(jwt.SigningMethodHS256 , jwt.MapClaims{
 		"email" : user.Email,
-		"exp" : time.Now().Add(time.Hour * 24).Unix(),
+		"exp" : time.Now().Add(time.Hour * 24).Unix(),	
 	   })
 
 	   tokenString , err := token.SignedString([] byte (os.Getenv("JWT_SECRET")))
 	   if err != nil {
 		return err
 	   }
+
+	   log.Printf("Generated Token: %s", tokenString) // Log the generated token
 
 	   return c.JSON(http.StatusOK , echo.Map {
 		"token" : tokenString,
