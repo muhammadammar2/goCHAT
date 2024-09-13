@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strings"
 
 	"github.com/joho/godotenv"
 	echojwt "github.com/labstack/echo-jwt"
@@ -44,16 +43,19 @@ func main() {
 		log.Fatalf("Failed to migrate database: %v", err)
 	}
 
-	log.Println("JWT_SECRET:", os.Getenv("JWT_SECRET")) // check the value of JWT_SECRET
+	// log.Println("JWT_SECRET:", os.Getenv("JWT_SECRET")) // check the value of JWT_SECRET
 	
 
-	jwtSecret := os.Getenv("JWT_SECRET")
-	if jwtSecret == "" {
-		log.Fatalf("JWT_SECRET not set in .env file")
+	// jwtSecret := os.Getenv(JWT_SECRET)
+	JWT_SECRET := "12hg3v1h23vh12v3h1v3gh12"  
+
+	if JWT_SECRET == "" {
+		// log.Fatalf("JWT_SECRET not set in .env file" )
+		log.Fatal("prob in JWT")
 	}
 
 	jwtMiddleware := echojwt.WithConfig(echojwt.Config{
-		SigningKey:    []byte(jwtSecret),
+		SigningKey:    []byte(JWT_SECRET),	
 		TokenLookup:   "header:Authorization",
 		ContextKey:    "user", 
 		ErrorHandler: func(c echo.Context, err error) error {
@@ -62,15 +64,15 @@ func main() {
 		},
 	})	
 	//testing the jwt
-	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) error {
-			authHeader := c.Request().Header.Get("Authorization")
-			if strings.HasPrefix(authHeader, "Bearer ") {
-				c.Request().Header.Set("Authorization", strings.TrimPrefix(authHeader, "Bearer "))
-			}
-			return next(c)
-		}
-	})
+	// e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
+	// 	return func(c echo.Context) error {
+	// 		authHeader := c.Request().Header.Get("Authorization")
+	// 		if strings.HasPrefix(authHeader, "Bearer ") {
+	// 			c.Request().Header.Set("Authorization", strings.TrimPrefix(authHeader, "Bearer "))
+	// 		}
+	// 		return next(c)
+	// 	}
+	// })
 
 	//custom middlware	
 	// e.Use(middlewares.JWTMiddleware(jwtSecret))
@@ -97,7 +99,7 @@ func main() {
 		return c.JSON(http.StatusOK, echo.Map{"message": "Token is valid"})
 	})
 	
-
+    // e.DELETE("/delete" , handlers.DeleteAccount(db))
 	r := e.Group("")
 	r.Use(jwtMiddleware)
 	r.DELETE("/delete", handlers.DeleteAccount(db))
