@@ -77,6 +77,7 @@ func main() {
 	
 	r := e.Group("")
 	r.Use(jwtMiddleware)
+	r.PUT("/update-profile" , handlers.UpdateProfile(db))
 	r.DELETE("/delete", handlers.DeleteAccount(db))
 
 	e.Logger.Fatal(e.Start(":8080"))

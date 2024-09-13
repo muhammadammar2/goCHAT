@@ -108,3 +108,51 @@ func Logout() echo.HandlerFunc {
     }
 }
 
+func UpdateProfile(db *gorm.DB) echo.HandlerFunc {
+    return func(c echo.Context) error {
+        user := c.Get("user").(*jwt.Token)
+        claims, ok := user.Claims.(jwt.MapClaims)
+        if !ok {
+            return echo.ErrUnauthorized
+        }
+
+        email, ok := claims["email"].(string)
+        if !ok {
+            return echo.ErrUnauthorized
+        }
+
+        var existingUser models.User
+        if err := db.Where("email = ?", email).First(&existingUser).Error; err != nil {
+            return echo.NewHTTPError(http.StatusNotFound, "User not found")
+        }
+
+        updatedData := new(models.User)
+        if err := c.Bind(updatedData); err != nil {
+            return err
+        }
+
+        if updatedData.Username != existingUser.Username {
+            var userWithSameUsername models.User
+            if err := db.Where("username = ?", updatedData.Username).First(&userWithSameUsername).Error; err == nil {
+                return echo.NewHTTPError(http.StatusConflict, "Username already in use")
+            }
+        }
+
+        existingUser.Username = updatedData.Username
+        existingUser.Name = updatedData.Name
+
+        if updatedData.Password != "" {
+            hashPass, err := bcrypt.GenerateFromPassword([]byte(updatedData.Password), bcrypt.DefaultCost)
+            if err != nil {
+                return err
+            }
+            existingUser.Password = string(hashPass)
+        }
+
+        if err := db.Save(&existingUser).Error; err != nil {
+            return err
+        }
+
+        return c.JSON(http.StatusOK, existingUser)
+    }
+}
