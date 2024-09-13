@@ -75,7 +75,6 @@ func main() {
 		return c.JSON(http.StatusOK, echo.Map{"message": "Token is valid"})
 	})
 	
-    // e.DELETE("/delete" , handlers.DeleteAccount(db))
 	r := e.Group("")
 	r.Use(jwtMiddleware)
 	r.DELETE("/delete", handlers.DeleteAccount(db))

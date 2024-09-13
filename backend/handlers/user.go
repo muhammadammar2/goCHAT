@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"dummy/models"
-	"log"
 	"net/http"
 	"time"
 
@@ -65,7 +64,6 @@ func Login (db * gorm.DB) echo.HandlerFunc {
 		return err
 	   }
 
-	   log.Printf("Generated Token: %s", tokenString) // Log the generated token
 
 	   return c.JSON(http.StatusOK , echo.Map {
 		"token" : tokenString,
@@ -73,7 +71,7 @@ func Login (db * gorm.DB) echo.HandlerFunc {
 	}
 
 }
- // not working bcs of the jwt
+
 func DeleteAccount(db *gorm.DB) echo.HandlerFunc {
     return func(c echo.Context) error {
         user := c.Get("user").(*jwt.Token)
@@ -87,8 +85,12 @@ func DeleteAccount(db *gorm.DB) echo.HandlerFunc {
             return echo.ErrUnauthorized
         }
 
-        if err := db.Where("email = ?", email).Delete(&models.User{}).Error; err != nil {
-            return echo.ErrInternalServerError
+        result := db.Unscoped().Where("email = ?", email).Delete(&models.User{})
+        if result.Error != nil {
+            return echo.NewHTTPError(http.StatusInternalServerError, "Failed to delete user")
+        }
+        if result.RowsAffected == 0 {
+            return echo.NewHTTPError(http.StatusNotFound, "User not found")
         }
 
         return c.JSON(http.StatusOK, echo.Map{
