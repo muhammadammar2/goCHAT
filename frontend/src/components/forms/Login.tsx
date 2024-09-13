@@ -1,19 +1,13 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
 
 function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const navigate = useNavigate();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Handle login logic here
     console.log("Login submitted:", { username, password });
-  };
-
-  const goToRegister = () => {
-    navigate("/register");
   };
 
   return (
@@ -51,14 +45,6 @@ function Login() {
             type="submit"
           >
             Login
-          </button>
-        </div>
-        <div className="flex items-center justify-center">
-          <button
-            onClick={goToRegister}
-            className="text-blue-400 hover:text-blue-500 font-bold py-3 px-6 rounded-full transition duration-300"
-          >
-            Register
           </button>
         </div>
       </form>
