@@ -46,10 +46,10 @@ func main() {
 	// log.Println("JWT_SECRET:", os.Getenv("JWT_SECRET")) // check the value of JWT_SECRET
 	
 
-	// jwtSecret := os.Getenv(JWT_SECRET)
+	jwtSecret := os.Getenv("JWT_SECRET")
 	JWT_SECRET := "12hg3v1h23vh12v3h1v3gh12"  
 
-	if JWT_SECRET == "" {
+	if jwtSecret == "" {
 		// log.Fatalf("JWT_SECRET not set in .env file" )
 		log.Fatal("prob in JWT")
 	}
@@ -63,31 +63,7 @@ func main() {
 			return echo.ErrUnauthorized
 		},
 	})	
-	//testing the jwt
-	// e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
-	// 	return func(c echo.Context) error {
-	// 		authHeader := c.Request().Header.Get("Authorization")
-	// 		if strings.HasPrefix(authHeader, "Bearer ") {
-	// 			c.Request().Header.Set("Authorization", strings.TrimPrefix(authHeader, "Bearer "))
-	// 		}
-	// 		return next(c)
-	// 	}
-	// })
-
-	//custom middlware	
-	// e.Use(middlewares.JWTMiddleware(jwtSecret))
-	// e.GET("/public", func(c echo.Context) error {
-	// 	return c.String(http.StatusOK, "Public endpoint")
-	// })
-	// e.GET("/protected", func(c echo.Context) error {
-	// 	user := c.Get("user") // Retrieve user info from context
-	// 	return c.JSON(http.StatusOK, map[string]interface{}{
-	// 		"user": user,
-	// 	})
-	// })
-
-		
-
+	
 	e.POST("/signup", handlers.Signup(db))
 	e.POST("/login", handlers.Login(db))
 	e.POST("/logout" , handlers.Logout())

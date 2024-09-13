@@ -59,7 +59,7 @@ func Login (db * gorm.DB) echo.HandlerFunc {
 		"exp" : time.Now().Add(time.Hour * 24).Unix(),	
 	   })
 
-	//    tokenString , err := token.SignedString([] byte (os.Getenv(JWT_SECRET)))
+	//    tokenString , err := token.SignedString([] byte (os.Getenv("JWT_SECRET")))
 	tokenString , err := token.SignedString([] byte (JWT_SECRET)) 
 	   if err != nil {
 		return err
