@@ -20,8 +20,7 @@ function Login() {
       const { token } = response.data;
       localStorage.setItem("token", token);
 
-      // Navigate to another route after successful login
-      navigate("/");
+      navigate("/room-options");
     } catch (err: any) {
       console.error(err.response?.data || err.message);
       setError(
@@ -45,7 +44,7 @@ function Login() {
           <input
             className="shadow appearance-none border border-gray-700 rounded w-full py-3 px-4 text-gray-300 leading-tight focus:outline-none focus:border-blue-500 bg-gray-700 transition duration-300"
             type="text"
-            placeholder="Username"
+            placeholder="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required

@@ -65,7 +65,7 @@ func Login (db * gorm.DB) echo.HandlerFunc {
 	   }
 
 
-	   return c.JSON(http.StatusOK , echo.Map {
+	   return c.JSON(http.StatusOK ,echo.Map {
 		"token" : tokenString,
 	   })
 	}
