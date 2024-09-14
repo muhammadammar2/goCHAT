@@ -19,7 +19,6 @@ func main() {
 	e := echo.New()
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
-	e.Use(middleware.CORS())
 
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
         AllowOrigins: []string{"http://localhost:3001"}, 
@@ -53,10 +52,10 @@ func main() {
 	// log.Println("JWT_SECRET:", os.Getenv("JWT_SECRET")) // check the value of JWT_SECRET
 	
 
-	jwtSecret := os.Getenv("JWT_SECRET")
+	// jwtSecret := os.Getenv("JWT_SECRET")
 	JWT_SECRET := "12hg3v1h23vh12v3h1v3gh12"  
 
-	if jwtSecret == "" {
+	if JWT_SECRET == "" {
 		// log.Fatalf("JWT_SECRET not set in .env file" )
 		log.Fatal("prob in JWT")
 	}

@@ -1,15 +1,54 @@
 import React, { useState } from "react";
+import apiClient from "../../api/apiClient"; // Import the axios instance
 
 function Register() {
   const [name, setName] = useState("");
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Function to handle registration
+  const register = async (
+    name: string,
+    username: string,
+    email: string,
+    password: string
+  ) => {
+    try {
+      const response = await apiClient.post("/signup", {
+        name,
+        username,
+        email,
+        password,
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Registration error:", error);
+      throw error;
+    }
+  };
+
+  // Handle form submission
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle registration logic here
-    console.log("Registration submitted:", { name, username, email, password });
+    setError("");
+    setSuccess("");
+    try {
+      const response = await register(name, username, email, password);
+      if (response.status === 201) {
+        setSuccess("Registration successful!");
+        // Clear form fields after successful registration
+        setName("");
+        setUsername("");
+        setEmail("");
+        setPassword("");
+      }
+    } catch (err) {
+      setError("Registration failed. Please try again.");
+      console.error("Registration error:", err);
+    }
   };
 
   return (
@@ -21,6 +60,12 @@ function Register() {
         <h2 className="text-3xl mb-6 text-center font-bold text-blue-400">
           Register
         </h2>
+
+        {error && <p className="text-red-500 text-center mb-4">{error}</p>}
+        {success && (
+          <p className="text-green-500 text-center mb-4">{success}</p>
+        )}
+
         <div className="mb-4">
           <input
             className="shadow appearance-none border border-gray-700 rounded w-full py-3 px-4 text-gray-300 leading-tight focus:outline-none focus:border-blue-500 bg-gray-700 transition duration-300"
