@@ -8,7 +8,7 @@ function JoinRoom() {
   useEffect(() => {
     async function fetchRooms() {
       try {
-        const response = await apiClient.get("/rooms"); // Endpoint to get rooms
+        const response = await apiClient.get("/rooms");
         setRooms(response.data);
       } catch (err: any) {
         console.error(err.response?.data || err.message);
