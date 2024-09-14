@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import apiClient from "../../api/apiClient"; // Import the axios instance
+import apiClient from "../../api/apiClient";
+import { useNavigate } from "react-router-dom";
 
 function Register() {
   const [name, setName] = useState("");
@@ -9,7 +10,8 @@ function Register() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  // Function to handle registration
+  const navigate = useNavigate();
+
   const register = async (
     name: string,
     username: string,
@@ -23,14 +25,14 @@ function Register() {
         email,
         password,
       });
-      return response.data;
+      console.log("Registration response:", response); // Debugging log
+      return response;
     } catch (error) {
       console.error("Registration error:", error);
       throw error;
     }
   };
 
-  // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -39,11 +41,16 @@ function Register() {
       const response = await register(name, username, email, password);
       if (response.status === 201) {
         setSuccess("Registration successful!");
-        // Clear form fields after successful registration
+        setTimeout(() => {
+          navigate("/login");
+        }, 1450);
         setName("");
         setUsername("");
         setEmail("");
         setPassword("");
+      } else {
+        setError("Unexpected response status");
+        console.error("Unexpected response status:", response.status);
       }
     } catch (err) {
       setError("Registration failed. Please try again.");
