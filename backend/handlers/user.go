@@ -37,7 +37,7 @@ func Signup (db * gorm.DB) echo.HandlerFunc{
 }
 
 func Login (db * gorm.DB) echo.HandlerFunc {
-	return func (c echo.Context) error  {
+	return func (c echo.Context) error  {   
        login := new (models.User)
 	   if err := c.Bind(login); err != nil {
 		return err

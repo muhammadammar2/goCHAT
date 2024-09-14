@@ -1,13 +1,34 @@
 import React, { useState } from "react";
+import apiClient from "../../api/apiClient";
+import { useNavigate } from "react-router-dom";
 
 function Login() {
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle login logic here
-    console.log("Login submitted:", { username, password });
+
+    try {
+      const response = await apiClient.post("/login", {
+        email,
+        password,
+      });
+
+      const { token } = response.data;
+      localStorage.setItem("token", token);
+
+      // Navigate to another route after successful login
+      navigate("/");
+    } catch (err: any) {
+      console.error(err.response?.data || err.message);
+      setError(
+        err.response?.data?.message ||
+          "Login failed. Please check your credentials."
+      );
+    }
   };
 
   return (
@@ -19,13 +40,14 @@ function Login() {
         <h2 className="text-3xl mb-6 text-center font-bold text-blue-400">
           Login
         </h2>
+        {error && <p className="text-red-500 text-center mb-4">{error}</p>}
         <div className="mb-4">
           <input
             className="shadow appearance-none border border-gray-700 rounded w-full py-3 px-4 text-gray-300 leading-tight focus:outline-none focus:border-blue-500 bg-gray-700 transition duration-300"
             type="text"
             placeholder="Username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             required
           />
         </div>
