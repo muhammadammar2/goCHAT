@@ -7,9 +7,10 @@ function App() {
   return (
     <Router>
       <div className="min-h-screen bg-gray-900 text-white flex flex-col lg:flex-row">
-        <div className="w-full lg:w-1/2 flex flex-col items-center justify-center p-8 bg-gradient-to-br from-blue-900 to-purple-900">
+        {/* Left Side (Title and Solid Background) */}
+        <div className="w-full lg:w-1/2 flex flex-col items-center justify-center p-8 bg-gradient-to-br from-gray-800 to-gray-700">
           <div className="text-center">
-            <h1 className="text-6xl lg:text-7xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400 mb-6 p-2">
+            <h1 className="text-6xl lg:text-7xl font-extrabold tracking-tight text-white mb-6 p-2">
               go<span className="align-baseline">CHAT</span>
             </h1>
             <p className="text-xl font-semibold leading-relaxed text-gray-300 mt-6 max-w-lg mx-auto">
@@ -17,7 +18,9 @@ function App() {
             </p>
           </div>
         </div>
-        <div className="w-full lg:w-1/2 flex flex-col items-center justify-center p-8">
+
+        {/* Right Side (Forms and Dark Background) */}
+        <div className="w-full lg:w-1/2 flex flex-col items-center justify-center p-8 bg-gray-900">
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
@@ -26,7 +29,7 @@ function App() {
               element={
                 <div className="w-full max-w-md">
                   <div className="bg-gray-800 shadow-lg rounded-lg px-8 pt-6 pb-8 mb-4">
-                    <h2 className="text-3xl mb-6 text-center font-bold text-blue-400">
+                    <h2 className="text-3xl mb-6 text-center font-bold text-white">
                       Home
                     </h2>
                     <div className="flex flex-col items-center">
