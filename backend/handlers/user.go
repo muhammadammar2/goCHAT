@@ -104,25 +104,6 @@ func DeleteAccount(db *gorm.DB) echo.HandlerFunc {
     }
 }
 
-
-// func Logout(client *redis.Client) echo.HandlerFunc {
-//     return func(c echo.Context) error {
-//         authHeader := c.Request().Header.Get("Authorization")
-//         token := strings.TrimPrefix(authHeader, "Bearer ")
-
-//         expiration := 24 * time.Hour
-
-//         // Blacklist the token in Redis
-//         err := redisclient.BlacklistToken(client, token, expiration)
-//         if err != nil {
-//             return echo.NewHTTPError(http.StatusInternalServerError, "Could not blacklist token")
-//         }
-
-//         return c.JSON(http.StatusOK, map[string]string{"message": "Logged out successfully"})
-//     }
-// }
-
-
 func Logout(client *redis.Client) echo.HandlerFunc {
     return func(c echo.Context) error {
         authHeader := c.Request().Header.Get("Authorization")
@@ -135,7 +116,6 @@ func Logout(client *redis.Client) echo.HandlerFunc {
 
         expiration := 24 * time.Hour
 
-        // Blacklist the token in Redis
         err := redisclient.BlacklistToken(client, token, expiration)
         if err != nil {
             log.Printf("Error during logout: %v", err)

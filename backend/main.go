@@ -21,12 +21,6 @@ func main() {
 	e.Use(middleware.Recover())
 	e.Use(middlewares.CORSMiddleware())
 
-//     e.HTTPErrorHandler = func(err error, c echo.Context) {
-//     log.Printf("Error: %v", err)
-//     e.DefaultHTTPErrorHandler(err, c)
-//   }
-
-
 	if err := godotenv.Load(); err != nil {
 		log.Fatalf("Error loading .env file: %v", err)
 	}
@@ -60,24 +54,6 @@ func main() {
 	
 	r := e.Group("")
 	r.Use(jwtMiddleware , blacklistMiddleware)
-	// e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
-	// 	return func(c echo.Context) error {
-	// 		authHeader := c.Request().Header.Get("Authorization")
-	// 		token := strings.TrimPrefix(authHeader, "Bearer ")
-
-	// 		// Check if the token is blacklisted
-	// 		blacklisted, err := redisclient.IsTokenBlacklisted(redisClient, token)
-	// 		if err != nil {
-	// 			return echo.NewHTTPError(http.StatusInternalServerError, "Internal Server Error")
-	// 		}
-	// 		if blacklisted {
-	// 			return echo.ErrUnauthorized
-	// 		}
-
-	// 		// Continue with the JWT middleware
-	// 		return jwtMiddleware(next)(c)
-	// 	}
-	// })
 	r.PUT("/update-profile" , handlers.UpdateProfile(db))
 	r.DELETE("/delete", handlers.DeleteAccount(db))
 
