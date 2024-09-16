@@ -19,7 +19,6 @@ function CreateRoomForm() {
         private: isPrivate,
         code: isPrivate ? code : undefined,
       });
-      // Redirect or show success message
       navigate("/room-options");
     } catch (err: any) {
       console.error(err.response?.data || err.message);
