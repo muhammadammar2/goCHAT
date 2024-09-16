@@ -2,11 +2,16 @@ package handlers
 
 import (
 	"dummy/models"
+	redisclient "dummy/redis"
+	"log"
 	"net/http"
+
+	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/labstack/echo/v4"
+	"github.com/redis/go-redis/v9"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
@@ -100,11 +105,45 @@ func DeleteAccount(db *gorm.DB) echo.HandlerFunc {
 }
 
 
-func Logout() echo.HandlerFunc {
+// func Logout(client *redis.Client) echo.HandlerFunc {
+//     return func(c echo.Context) error {
+//         authHeader := c.Request().Header.Get("Authorization")
+//         token := strings.TrimPrefix(authHeader, "Bearer ")
+
+//         expiration := 24 * time.Hour
+
+//         // Blacklist the token in Redis
+//         err := redisclient.BlacklistToken(client, token, expiration)
+//         if err != nil {
+//             return echo.NewHTTPError(http.StatusInternalServerError, "Could not blacklist token")
+//         }
+
+//         return c.JSON(http.StatusOK, map[string]string{"message": "Logged out successfully"})
+//     }
+// }
+
+
+func Logout(client *redis.Client) echo.HandlerFunc {
     return func(c echo.Context) error {
-        return c.JSON(http.StatusOK, echo.Map{
-            "message": "Logout successful. clear your token on the client side",
-        })
+        authHeader := c.Request().Header.Get("Authorization")
+        token := strings.TrimPrefix(authHeader, "Bearer ")
+
+        if token == "" {
+            log.Println("No token provided for logout")
+            return echo.NewHTTPError(http.StatusBadRequest, "No token provided")
+        }
+
+        expiration := 24 * time.Hour
+
+        // Blacklist the token in Redis
+        err := redisclient.BlacklistToken(client, token, expiration)
+        if err != nil {
+            log.Printf("Error during logout: %v", err)
+            return echo.NewHTTPError(http.StatusInternalServerError, "Could not blacklist token")
+        }
+
+        log.Println("User logged out successfully")
+        return c.JSON(http.StatusOK, map[string]string{"message": "Logged out successfully"})
     }
 }
 

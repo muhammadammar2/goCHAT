@@ -5,12 +5,10 @@ function RoomOptions() {
   const navigate = useNavigate();
 
   const handleCreateRoom = () => {
-    // Navigate to the create room page
     navigate("/create-room");
   };
 
   const handleJoinRoom = () => {
-    // Navigate to the join room page
     navigate("/join-room");
   };
 

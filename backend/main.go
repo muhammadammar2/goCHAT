@@ -2,13 +2,13 @@ package main
 
 import (
 	"dummy/handlers"
+	"dummy/middlewares"
 	"dummy/models"
+	redisclient "dummy/redis"
 	"log"
-	"net/http"
 	"os"
 
 	"github.com/joho/godotenv"
-	echojwt "github.com/labstack/echo-jwt"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"gorm.io/driver/mysql"
@@ -19,12 +19,13 @@ func main() {
 	e := echo.New()
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
+	e.Use(middlewares.CORSMiddleware())
 
-	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-        AllowOrigins: []string{"http://localhost:3001"}, 
-        AllowMethods: []string{echo.GET, echo.POST, echo.PUT, echo.DELETE},
-        AllowHeaders: []string{echo.HeaderContentType, echo.HeaderAuthorization},
-    }))
+//     e.HTTPErrorHandler = func(err error, c echo.Context) {
+//     log.Printf("Error: %v", err)
+//     e.DefaultHTTPErrorHandler(err, c)
+//   }
+
 
 	if err := godotenv.Load(); err != nil {
 		log.Fatalf("Error loading .env file: %v", err)
@@ -49,40 +50,34 @@ func main() {
 		log.Fatalf("Failed to migrate database: %v", err)
 	}
 
-	// log.Println("JWT_SECRET:", os.Getenv("JWT_SECRET")) // check the value of JWT_SECRET
-	
+	redisClient := redisclient.NewRedisClient()
+	jwtMiddleware := middlewares.JWTMiddleware()
+	blacklistMiddleware := middlewares.TokenBlacklistMiddleware(redisClient)
 
-	// jwtSecret := os.Getenv("JWT_SECRET")
-	JWT_SECRET := "12hg3v1h23vh12v3h1v3gh12"  
-
-	if JWT_SECRET == "" {
-		// log.Fatalf("JWT_SECRET not set in .env file" )
-		log.Fatal("prob in JWT")
-	}
-
-	jwtMiddleware := echojwt.WithConfig(echojwt.Config{
-		SigningKey:    []byte(JWT_SECRET),	
-		TokenLookup:   "header:Authorization",
-		ContextKey:    "user", 
-		ErrorHandler: func(c echo.Context, err error) error {
-			log.Printf("JWT Error: %v", err)
-			return echo.ErrUnauthorized
-		},
-	})	
-	
 	e.POST("/signup", handlers.Signup(db))
 	e.POST("/login", handlers.Login(db))
-	e.POST("/logout" , handlers.Logout())
-	e.GET("/test", func(c echo.Context) error {
-		user := c.Get("user")
-		if user == nil {
-			return echo.ErrUnauthorized
-		}
-		return c.JSON(http.StatusOK, echo.Map{"message": "Token is valid"})
-	})
+	e.POST("/logout" , handlers.Logout(redisClient))
 	
 	r := e.Group("")
-	r.Use(jwtMiddleware)
+	r.Use(jwtMiddleware , blacklistMiddleware)
+	// e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
+	// 	return func(c echo.Context) error {
+	// 		authHeader := c.Request().Header.Get("Authorization")
+	// 		token := strings.TrimPrefix(authHeader, "Bearer ")
+
+	// 		// Check if the token is blacklisted
+	// 		blacklisted, err := redisclient.IsTokenBlacklisted(redisClient, token)
+	// 		if err != nil {
+	// 			return echo.NewHTTPError(http.StatusInternalServerError, "Internal Server Error")
+	// 		}
+	// 		if blacklisted {
+	// 			return echo.ErrUnauthorized
+	// 		}
+
+	// 		// Continue with the JWT middleware
+	// 		return jwtMiddleware(next)(c)
+	// 	}
+	// })
 	r.PUT("/update-profile" , handlers.UpdateProfile(db))
 	r.DELETE("/delete", handlers.DeleteAccount(db))
 

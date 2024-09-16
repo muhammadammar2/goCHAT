@@ -25,7 +25,7 @@ function Register() {
         email,
         password,
       });
-      console.log("Registration response:", response); // Debugging log
+      console.log("Registration response:", response);
       return response;
     } catch (error) {
       console.error("Registration error:", error);
