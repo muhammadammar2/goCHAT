@@ -11,6 +11,7 @@ import CreateRoomForm from "./components/rooms/createRoomForm";
 import JoinRoom from "./components/rooms/JoinRoom";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { AuthProvider, useAuth } from "./auth/AuthContext";
+import ProfilePage from "./components/ProfilePage";
 
 function App() {
   return (
@@ -29,7 +30,10 @@ function App() {
           </div>
 
           <div className="w-full lg:w-1/2 flex flex-col items-center justify-center p-8 bg-gray-900">
-            <LogoutButton />
+            <div className="flex w-full justify-between">
+              <LogoutButton />
+              <ProfileButton />
+            </div>
             <Routes>
               {/* Public Routes */}
               <Route path="/login" element={<Login />} />
@@ -41,6 +45,7 @@ function App() {
                 <Route path="/room-options" element={<RoomOptions />} />
                 <Route path="/create-room" element={<CreateRoomForm />} />
                 <Route path="/join-room" element={<JoinRoom />} />
+                <Route path="/profile" element={<ProfilePage />} />
               </Route>
             </Routes>
           </div>
@@ -66,6 +71,24 @@ function LogoutButton() {
         className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline transition duration-300"
       >
         Logout
+      </button>
+    </div>
+  );
+}
+
+function ProfileButton() {
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+
+  if (!isAuthenticated) return null;
+
+  return (
+    <div className="absolute top-4 right-24">
+      <button
+        onClick={() => navigate("/profile")}
+        className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline transition duration-300"
+      >
+        Profile
       </button>
     </div>
   );

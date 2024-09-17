@@ -21,7 +21,7 @@ func main() {
 	e.Use(middleware.Recover())
 	e.Use(middlewares.CORSMiddleware())
 
-	if err := godotenv.Load(); err != nil {
+	if err := godotenv.Load(); err != nil {	
 		log.Fatalf("Error loading .env file: %v", err)
 	}
 
@@ -55,6 +55,7 @@ func main() {
 	r := e.Group("")
 	r.Use(jwtMiddleware , blacklistMiddleware)
 	r.PUT("/update-profile" , handlers.UpdateProfile(db))
+	r.GET("/profile", handlers.GetProfile(db))
 	r.DELETE("/delete", handlers.DeleteAccount(db))
 
 	e.Logger.Fatal(e.Start(":8080"))

@@ -175,3 +175,37 @@ func UpdateProfile(db *gorm.DB) echo.HandlerFunc {
         return c.JSON(http.StatusOK, existingUser)
     }
 }
+
+
+func GetUserProfile(db *gorm.DB, username string) (models.User, error) {
+    var user models.User
+    err := db.Where("username = ?", username).First(&user).Error
+    if err != nil {
+        return user, err
+    }
+    return user, nil
+}
+
+
+
+func GetProfile(db *gorm.DB) echo.HandlerFunc {
+    return func(c echo.Context) error {
+        user := c.Get("user").(*jwt.Token)
+        claims, ok := user.Claims.(jwt.MapClaims)
+        if !ok {
+            return echo.ErrUnauthorized
+        }
+
+        username, ok := claims["username"].(string)
+        if !ok {
+            return echo.ErrUnauthorized
+        }
+
+        profile, err := GetUserProfile(db, username)
+        if err != nil {
+            return echo.NewHTTPError(http.StatusInternalServerError, "Unable to retrieve user profile")
+        }
+
+        return c.JSON(http.StatusOK, profile)
+    }
+}
