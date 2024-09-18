@@ -1,10 +1,8 @@
 package handlers
 
 import (
-	"bytes"
 	"dummy/models"
 	redisclient "dummy/redis"
-	"io"
 	"log"
 	"net/http"
 
@@ -21,16 +19,6 @@ import (
 
 func Signup(db *gorm.DB) echo.HandlerFunc {
     return func(c echo.Context) error {
-        // Log the raw request body
-        body, err := io.ReadAll(c.Request().Body)
-        if err != nil {
-            log.Printf("Error reading request body: %v", err)
-            return echo.NewHTTPError(http.StatusBadRequest, "Error reading request")
-        }
-        log.Printf("Raw request body: %s", string(body))
-        // Reset the request body to be read again
-        c.Request().Body = io.NopCloser(bytes.NewBuffer(body))
-
         signupData := struct {
             Username string `json:"username"`
             Name     string `json:"name"`
@@ -39,11 +27,10 @@ func Signup(db *gorm.DB) echo.HandlerFunc {
         }{}
 
         if err := c.Bind(&signupData); err != nil {
-            log.Printf("Error binding user data: %v", err)
+            // log.Printf("Error binding user data: %v", err)
             return echo.NewHTTPError(http.StatusBadRequest, "Invalid request data")
         }
 
-        log.Printf("Received signup data: %+v", signupData)
 
         if signupData.Password == "" {
             return echo.NewHTTPError(http.StatusBadRequest, "Password is required")
@@ -62,14 +49,12 @@ func Signup(db *gorm.DB) echo.HandlerFunc {
             Password: string(hashPass),
         }
 
-        log.Printf("Attempting to create user: %+v", user)
-
         if err := db.Create(user).Error; err != nil {
-            log.Printf("Error creating user in database: %v", err)
+            // log.Printf("Error creating user in database: %v", err)
             return echo.NewHTTPError(http.StatusInternalServerError, "Error creating user")
         }
 
-        log.Printf("User created successfully: %s", user.Email)
+        // log.Printf("User created successfully: %s", user.Email)
 
         return c.JSON(http.StatusCreated, echo.Map{
             "message": "User created successfully",
