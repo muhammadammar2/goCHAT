@@ -21,6 +21,9 @@ func main() {
 	e.Use(middleware.Recover())
 	e.Use(middlewares.CORSMiddleware())
 
+	log.SetOutput(os.Stdout)
+	log.Println("Server starting...")
+
 	if err := godotenv.Load(); err != nil {	
 		log.Fatalf("Error loading .env file: %v", err)
 	}
@@ -57,6 +60,7 @@ func main() {
 	r.PUT("/update-profile" , handlers.UpdateProfile(db))
 	r.GET("/profile", handlers.GetProfile(db))
 	r.DELETE("/delete", handlers.DeleteAccount(db))
+	r.GET("/profile", handlers.GetProfile(db))
 
 	e.Logger.Fatal(e.Start(":8080"))
 }

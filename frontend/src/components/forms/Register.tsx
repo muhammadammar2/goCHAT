@@ -19,9 +19,9 @@ function Register() {
     password: string
   ) => {
     const data = { name, username, email, password };
+    console.log("Sending registration data:", data);
     try {
       const response = await apiClient.post("/signup", data);
-
       console.log("Registration response:", response);
       return response;
     } catch (error) {
@@ -35,8 +35,17 @@ function Register() {
     setError("");
     setSuccess("");
 
+    console.log("Submitting registration data:", {
+      name,
+      username,
+      email,
+      password,
+    });
+
     try {
       const response = await register(name, username, email, password);
+      console.log("Registration response:", response);
+
       if (response.status === 201) {
         setSuccess("Registration successful!");
         setTimeout(() => {
@@ -46,10 +55,17 @@ function Register() {
         setUsername("");
         setEmail("");
         setPassword("");
+      } else {
+        setError("Unexpected response status");
+        console.error("Unexpected response status:", response.status);
       }
     } catch (err: any) {
       setError("Registration failed. Please try again.");
       console.error("Registration error:", err);
+      if (err.response) {
+        console.error("Error response:", err.response.data);
+        console.error("Error status:", err.response.status);
+      }
     }
   };
 
