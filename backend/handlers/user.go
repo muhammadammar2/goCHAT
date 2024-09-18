@@ -1,8 +1,10 @@
 package handlers
 
 import (
+	"bytes"
 	"dummy/models"
 	redisclient "dummy/redis"
+	"io"
 	"log"
 	"net/http"
 
@@ -17,65 +19,113 @@ import (
 )
 
 
-func Signup (db * gorm.DB) echo.HandlerFunc{
-	return func (c echo.Context) error {
-		user := new(models.User)
-		if err := c.Bind(user); err != nil {
-			return err
-		}
-	
+func Signup(db *gorm.DB) echo.HandlerFunc {
+    return func(c echo.Context) error {
+        // Log the raw request body
+        body, err := io.ReadAll(c.Request().Body)
+        if err != nil {
+            log.Printf("Error reading request body: %v", err)
+            return echo.NewHTTPError(http.StatusBadRequest, "Error reading request")
+        }
+        log.Printf("Raw request body: %s", string(body))
+        // Reset the request body to be read again
+        c.Request().Body = io.NopCloser(bytes.NewBuffer(body))
 
-	hashPass, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
-	if err != nil {
-		return err
-	}
+        signupData := struct {
+            Username string `json:"username"`
+            Name     string `json:"name"`
+            Email    string `json:"email"`
+            Password string `json:"password"`
+        }{}
 
-	user.Password = string (hashPass)
-    
-	if err := db.Create(user).Error; err != nil {
-		return err
-	}
+        if err := c.Bind(&signupData); err != nil {
+            log.Printf("Error binding user data: %v", err)
+            return echo.NewHTTPError(http.StatusBadRequest, "Invalid request data")
+        }
 
-	return c.JSON(http.StatusCreated , user)
+        log.Printf("Received signup data: %+v", signupData)
+
+        if signupData.Password == "" {
+            return echo.NewHTTPError(http.StatusBadRequest, "Password is required")
+        }
+
+        hashPass, err := bcrypt.GenerateFromPassword([]byte(signupData.Password), bcrypt.DefaultCost)
+        if err != nil {
+            log.Printf("Error hashing password: %v", err)
+            return echo.NewHTTPError(http.StatusInternalServerError, "Error processing password")
+        }
+
+        user := &models.User{
+            Username: signupData.Username,
+            Name:     signupData.Name,
+            Email:    signupData.Email,
+            Password: string(hashPass),
+        }
+
+        log.Printf("Attempting to create user: %+v", user)
+
+        if err := db.Create(user).Error; err != nil {
+            log.Printf("Error creating user in database: %v", err)
+            return echo.NewHTTPError(http.StatusInternalServerError, "Error creating user")
+        }
+
+        log.Printf("User created successfully: %s", user.Email)
+
+        return c.JSON(http.StatusCreated, echo.Map{
+            "message": "User created successfully",
+            "userId":  user.ID,
+        })
+    }
 }
 
+func Login(db *gorm.DB) echo.HandlerFunc {
+    return func(c echo.Context) error {
+        login := new(struct {
+            Email    string `json:"email"`
+            Password string `json:"password"`
+        })
+
+        if err := c.Bind(login); err != nil {
+            log.Printf("Error binding login data: %v", err)
+            return echo.NewHTTPError(http.StatusBadRequest, "Invalid request")
+        }
+        user := new(models.User)
+        if err := db.Where("email = ?", login.Email).First(user).Error; err != nil {
+            if err == gorm.ErrRecordNotFound {
+                log.Printf("User not found: %s", login.Email)
+                return echo.NewHTTPError(http.StatusUnauthorized, "Invalid email or password")
+            }
+            log.Printf("Database error: %v", err)
+            return echo.NewHTTPError(http.StatusInternalServerError, "Internal server error")
+        }
+
+        err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(login.Password))
+        if err != nil {
+            return echo.NewHTTPError(http.StatusUnauthorized, "Invalid email or password")
+        }
+
+
+        JWT_SECRET := "12hg3v1h23vh12v3h1v3gh12"
+        token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+            "userID": user.ID,
+            "email":  user.Email,
+            "exp":    time.Now().Add(time.Hour * 24).Unix(),
+        })
+
+        tokenString, err := token.SignedString([]byte(JWT_SECRET))
+        if err != nil {
+            log.Printf("Error generating token: %v", err)
+            return echo.NewHTTPError(http.StatusInternalServerError, "Failed to generate token")
+        }
+
+        log.Printf("Login successful for user: %s", user.Email)
+
+        return c.JSON(http.StatusOK, echo.Map{
+            "token": tokenString,
+        })
+    }
 }
 
-func Login (db * gorm.DB) echo.HandlerFunc {
-	return func (c echo.Context) error  {   
-       login := new (models.User)
-	   if err := c.Bind(login); err != nil {
-		return err
-	   }
-
-	   user := new (models.User)
-	   if err := db.Where("email = ?" , login.Email).First(user).Error; err != nil {
-		return echo.NewHTTPError(http.StatusUnauthorized , "Invalid Email || pass")
-	   }
-	   if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(login.Password)); err != nil {
-		  return echo.NewHTTPError(http.StatusUnauthorized , "Invalid Email || pass")
-	   }
-	   JWT_SECRET := "12hg3v1h23vh12v3h1v3gh12"  
-
-	   token := jwt.NewWithClaims(jwt.SigningMethodHS256 , jwt.MapClaims{
-		"userID" : user.ID,
-		"email" : user.Email,
-		"exp" : time.Now().Add(time.Hour * 24).Unix(),	
-	   })
-
-	//    tokenString , err := token.SignedString([] byte (os.Getenv("JWT_SECRET")))
-	tokenString , err := token.SignedString([] byte (JWT_SECRET)) 
-	   if err != nil {
-		return err
-	   }
-
-
-	   return c.JSON(http.StatusOK ,echo.Map {
-		"token" : tokenString,
-	   })
-	}
-
-}
 
 func DeleteAccount(db *gorm.DB) echo.HandlerFunc {
     return func(c echo.Context) error {
@@ -209,3 +259,6 @@ func GetProfile(db *gorm.DB) echo.HandlerFunc {
         return c.JSON(http.StatusOK, profile)
     }
 }
+
+
+

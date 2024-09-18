@@ -45,7 +45,7 @@ func main() {
 	}
 
 	redisClient := redisclient.NewRedisClient()
-	jwtMiddleware := middlewares.JWTMiddleware()
+	jwtMiddleware := middlewares.JWTMiddleware(redisClient)
 	blacklistMiddleware := middlewares.TokenBlacklistMiddleware(redisClient)
 
 	e.POST("/signup", handlers.Signup(db))
