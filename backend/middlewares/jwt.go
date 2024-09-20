@@ -23,7 +23,13 @@ func JWTMiddleware(redisClient *redis.Client) echo.MiddlewareFunc {
         ContextKey:  "user",
         ErrorHandler: func(c echo.Context, err error) error {
             authHeader := c.Request().Header.Get("Authorization")
-            token := strings.TrimPrefix(authHeader, "Bearer ")
+            // token := strings.TrimPrefix(authHeader, "Bearer ")
+            token := strings.TrimSpace(strings.TrimPrefix(authHeader, "Bearer "))
+
+            if token == "" {
+                log.Println("Authorization token is missing")
+                return echo.NewHTTPError(http.StatusUnauthorized, "Missing authorization token")
+            }
 
             blacklisted, redisErr := redisclient.IsTokenBlacklisted(redisClient, token)
             if redisErr != nil {

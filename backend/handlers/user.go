@@ -225,39 +225,25 @@ func UpdateProfile(db *gorm.DB) echo.HandlerFunc {
 }
 
 
-func GetUserProfile(db *gorm.DB, username string) (models.User, error) {
-    var user models.User
-    err := db.Where("username = ?", username).First(&user).Error
-    if err != nil {
-        return user, err
-    }
-    return user, nil
-}
-
-
-
-func GetProfile(db *gorm.DB) echo.HandlerFunc {
+func GetUserProfile(db *gorm.DB) echo.HandlerFunc {
     return func(c echo.Context) error {
+        log.Println("GetUserProfile handler called")
+
         user := c.Get("user").(*jwt.Token)
-        claims, ok := user.Claims.(jwt.MapClaims)
-        if !ok {
-            return echo.ErrUnauthorized
-        }
+        claims := user.Claims.(jwt.MapClaims)
+        username := claims["username"].(string)
 
-        username, ok := claims["username"].(string)
-        if !ok {
-            return echo.ErrUnauthorized
-        }
+        log.Printf("Fetching profile for user: %s", username) 
 
-        profile, err := GetUserProfile(db, username)
-        if err != nil {
-            return echo.NewHTTPError(http.StatusInternalServerError, "Unable to retrieve user profile")
+        var profile models.User
+        if err := db.Where("username = ?", username).First(&profile).Error; err != nil {
+            log.Printf("Error fetcing the use profile %v", err)
+            return echo.NewHTTPError(http.StatusNotFound, "User not found")
         }
 
         return c.JSON(http.StatusOK, profile)
     }
 }
-
 
 
 

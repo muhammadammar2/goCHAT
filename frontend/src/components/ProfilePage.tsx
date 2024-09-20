@@ -3,10 +3,14 @@ import { useAuth } from "../auth/AuthContext";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
+interface UserProfile {
+  username: string;
+  name: string;
+  email: string;
+}
+
 const ProfilePage: React.FC = () => {
-  const [username, setUsername] = useState("");
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+  const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { isAuthenticated } = useAuth();
@@ -18,19 +22,19 @@ const ProfilePage: React.FC = () => {
       return;
     }
 
-    apiClient
-      .get("/profile")
-      .then((response) => {
-        setUsername(response.data.username);
-        setName(response.data.name);
-        setEmail(response.data.email);
-        setLoading(false);
-      })
-      .catch((error) => {
+    const fetchProfile = async () => {
+      try {
+        const response = await apiClient.get<UserProfile>("/profile");
+        setProfile(response.data);
+      } catch (error) {
         console.error("Error fetching profile data:", error);
         setError("Failed to load profile data.");
+      } finally {
         setLoading(false);
-      });
+      }
+    };
+
+    fetchProfile();
   }, [isAuthenticated, navigate]);
 
   if (loading) return <p className="text-center text-gray-400">Loading...</p>;
@@ -41,16 +45,26 @@ const ProfilePage: React.FC = () => {
         <h1 className="text-3xl font-bold text-center mb-6">Your Profile</h1>
         {error && <p className="text-red-500 mb-4 text-center">{error}</p>}
 
-        <div className="text-lg mb-4">
-          <strong>Username:</strong>{" "}
-          <span className="text-gray-300">{username}</span>
-        </div>
-        <div className="text-lg mb-4">
-          <strong>Name:</strong> <span className="text-gray-300">{name}</span>
-        </div>
-        <div className="text-lg mb-4">
-          <strong>Email:</strong> <span className="text-gray-300">{email}</span>
-        </div>
+        {profile ? (
+          <>
+            <div className="text-lg mb-4">
+              <strong>Username:</strong>{" "}
+              <span className="text-gray-300">{profile.username}</span>
+            </div>
+            <div className="text-lg mb-4">
+              <strong>Name:</strong>{" "}
+              <span className="text-gray-300">{profile.name}</span>
+            </div>
+            <div className="text-lg mb-4">
+              <strong>Email:</strong>{" "}
+              <span className="text-gray-300">{profile.email}</span>
+            </div>
+          </>
+        ) : (
+          <p className="text-red-500 mb-4 text-center">
+            Profile data not available.
+          </p>
+        )}
 
         <button
           onClick={() => navigate("/update-profile")}
