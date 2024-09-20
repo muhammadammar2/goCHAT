@@ -21,14 +21,12 @@ import (
 
 func Signup(db *gorm.DB) echo.HandlerFunc {
     return func(c echo.Context) error {
-        // Log the raw request body
         body, err := io.ReadAll(c.Request().Body)
         if err != nil {
             log.Printf("Error reading request body: %v", err)
             return echo.NewHTTPError(http.StatusBadRequest, "Error reading request")
         }
         log.Printf("Raw request body: %s", string(body))
-        // Reset the request body to be read again
         c.Request().Body = io.NopCloser(bytes.NewBuffer(body))
 
         signupData := struct {
