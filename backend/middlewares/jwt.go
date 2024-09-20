@@ -23,7 +23,6 @@ func JWTMiddleware(redisClient *redis.Client) echo.MiddlewareFunc {
         ContextKey:  "user",
         ErrorHandler: func(c echo.Context, err error) error {
             authHeader := c.Request().Header.Get("Authorization")
-            // token := strings.TrimPrefix(authHeader, "Bearer ")
             token := strings.TrimSpace(strings.TrimPrefix(authHeader, "Bearer "))
 
             if token == "" {
@@ -33,6 +32,7 @@ func JWTMiddleware(redisClient *redis.Client) echo.MiddlewareFunc {
 
             blacklisted, redisErr := redisclient.IsTokenBlacklisted(redisClient, token)
             if redisErr != nil {
+                log.Printf("Redis error while checking token blacklist: %v", redisErr)
                 return echo.NewHTTPError(http.StatusInternalServerError, "Redis Error")
             }
             if blacklisted {

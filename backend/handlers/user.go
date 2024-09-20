@@ -155,7 +155,7 @@ func DeleteAccount(db *gorm.DB) echo.HandlerFunc {
 func Logout(client *redis.Client) echo.HandlerFunc {
     return func(c echo.Context) error {
         authHeader := c.Request().Header.Get("Authorization")
-        token := strings.TrimPrefix(authHeader, "Bearer ")
+        token := strings.TrimSpace(strings.TrimPrefix(authHeader, "Bearer "))
 
         if token == "" {
             log.Println("No token provided for logout")
@@ -164,7 +164,7 @@ func Logout(client *redis.Client) echo.HandlerFunc {
 
         expiration := 24 * time.Hour
 
-        err := redisclient.BlacklistToken(client, token, expiration)
+        err := redisclient.BlacklistToken(client , token, expiration)
         if err != nil {
             log.Printf("Error during logout: %v", err)
             return echo.NewHTTPError(http.StatusInternalServerError, "Could not blacklist token")
@@ -229,21 +229,34 @@ func GetUserProfile(db *gorm.DB) echo.HandlerFunc {
     return func(c echo.Context) error {
         log.Println("GetUserProfile handler called")
 
-        user := c.Get("user").(*jwt.Token)
-        claims := user.Claims.(jwt.MapClaims)
-        username := claims["username"].(string)
+        user := c.Get("user")
+        if user == nil {
+            return echo.NewHTTPError(http.StatusUnauthorized, "Unauthorized")
+        }
 
-        log.Printf("Fetching profile for user: %s", username) 
+        token, ok := user.(*jwt.Token)
+        if !ok {
+            return echo.NewHTTPError(http.StatusUnauthorized, "Invalid token")
+        }
+
+        claims, ok := token.Claims.(jwt.MapClaims)
+        if !ok || claims["username"] == nil {
+            return echo.NewHTTPError(http.StatusUnauthorized, "Invalid claims")
+        }
+
+        username := claims["username"].(string)
+        log.Printf("Fetching profile for user: %s", username)
 
         var profile models.User
         if err := db.Where("username = ?", username).First(&profile).Error; err != nil {
-            log.Printf("Error fetcing the use profile %v", err)
+            log.Printf("Error fetching the user profile: %v", err)
             return echo.NewHTTPError(http.StatusNotFound, "User not found")
         }
 
         return c.JSON(http.StatusOK, profile)
     }
 }
+
 
 
 
