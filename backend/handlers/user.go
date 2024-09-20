@@ -225,39 +225,75 @@ func UpdateProfile(db *gorm.DB) echo.HandlerFunc {
 }
 
 
+// func GetUserProfile(db *gorm.DB) echo.HandlerFunc {
+//     return func(c echo.Context) error {
+//         log.Println("GetUserProfile handler called")
+
+//         user := c.Get("user")
+//         if user == nil {
+//             return echo.NewHTTPError(http.StatusUnauthorized, "Unauthorized")
+//         }
+
+//         token, ok := user.(*jwt.Token)
+//         if !ok {
+//             return echo.NewHTTPError(http.StatusUnauthorized, "Invalid token")
+//         }
+
+//         claims, ok := token.Claims.(jwt.MapClaims)
+//         if !ok || claims["username"] == nil {
+//             return echo.NewHTTPError(http.StatusUnauthorized, "Invalid claims")
+//         }
+
+//         username := claims["username"].(string)
+//         log.Printf("Fetching profile for user: %s", username)
+
+//         var profile models.User
+//         if err := db.Where("username = ?", username).First(&profile).Error; err != nil {
+//             log.Printf("Error fetching the user profile: %v", err)
+//             return echo.NewHTTPError(http.StatusNotFound, "User not found")
+//         }
+
+//         return c.JSON(http.StatusOK, profile)
+//     }
+// }
+
+
+
+
 func GetUserProfile(db *gorm.DB) echo.HandlerFunc {
     return func(c echo.Context) error {
         log.Println("GetUserProfile handler called")
 
+        // Retrieve the user (token) from the Echo context
         user := c.Get("user")
         if user == nil {
             return echo.NewHTTPError(http.StatusUnauthorized, "Unauthorized")
         }
 
+        // Parse the JWT token from context
         token, ok := user.(*jwt.Token)
         if !ok {
             return echo.NewHTTPError(http.StatusUnauthorized, "Invalid token")
         }
 
+        // Extract claims from the JWT token
         claims, ok := token.Claims.(jwt.MapClaims)
         if !ok || claims["username"] == nil {
             return echo.NewHTTPError(http.StatusUnauthorized, "Invalid claims")
         }
 
+        // Extract username from claims
         username := claims["username"].(string)
         log.Printf("Fetching profile for user: %s", username)
 
+        // Fetch the user profile from the database
         var profile models.User
         if err := db.Where("username = ?", username).First(&profile).Error; err != nil {
             log.Printf("Error fetching the user profile: %v", err)
             return echo.NewHTTPError(http.StatusNotFound, "User not found")
         }
 
+        // Return the profile information as a JSON response
         return c.JSON(http.StatusOK, profile)
     }
 }
-
-
-
-
-
