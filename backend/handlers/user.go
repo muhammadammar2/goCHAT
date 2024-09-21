@@ -224,42 +224,6 @@ func UpdateProfile(db *gorm.DB) echo.HandlerFunc {
     }
 }
 
-
-// func GetUserProfile(db *gorm.DB) echo.HandlerFunc {
-//     return func(c echo.Context) error {
-//         log.Println("GetUserProfile handler called")
-
-//         user := c.Get("user")
-//         if user == nil {
-//             return echo.NewHTTPError(http.StatusUnauthorized, "Unauthorized")
-//         }
-
-//         token, ok := user.(*jwt.Token)
-//         if !ok {
-//             return echo.NewHTTPError(http.StatusUnauthorized, "Invalid token")
-//         }
-
-//         claims, ok := token.Claims.(jwt.MapClaims)
-//         if !ok || claims["username"] == nil {
-//             return echo.NewHTTPError(http.StatusUnauthorized, "Invalid claims")
-//         }
-
-//         username := claims["username"].(string)
-//         log.Printf("Fetching profile for user: %s", username)
-
-//         var profile models.User
-//         if err := db.Where("username = ?", username).First(&profile).Error; err != nil {
-//             log.Printf("Error fetching the user profile: %v", err)
-//             return echo.NewHTTPError(http.StatusNotFound, "User not found")
-//         }
-
-//         return c.JSON(http.StatusOK, profile)
-//     }
-// }
-
-
-
-
 func GetUserProfile(db *gorm.DB) echo.HandlerFunc {
     return func(c echo.Context) error {
         log.Println("GetUserProfile handler called")
