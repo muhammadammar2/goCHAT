@@ -15,7 +15,6 @@ func JWTMiddleware(redisClient *redis.Client) echo.MiddlewareFunc {
     if JWT_SECRET == "" {
         log.Fatal("JWT secret is missing")
     }
-
     return echojwt.WithConfig(echojwt.Config{
         SigningKey:  []byte(JWT_SECRET),
         TokenLookup: "header:Authorization",

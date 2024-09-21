@@ -58,6 +58,7 @@ func main() {
 	r := e.Group("")
 	r.Use(jwtMiddleware , blacklistMiddleware)
 	r.PUT("/update-profile" , handlers.UpdateProfile(db))
+	r.POST("/create-room" , handlers.CreateRoom(db))
 	// r.GET("/profile", handlers.GetUserProfile(db))
 	r.DELETE("/delete", handlers.DeleteAccount(db))
 

@@ -16,10 +16,10 @@ function CreateRoomForm() {
       await apiClient.post("/create-room", {
         name,
         description,
-        private: isPrivate,
+        type: isPrivate ? "private" : "public",
         code: isPrivate ? code : undefined,
       });
-      navigate("/room-options");
+      navigate("/profile");
     } catch (err: any) {
       console.error(err.response?.data || err.message);
       setError("Failed to create room. Please try again.");

@@ -63,6 +63,49 @@ func Signup(db *gorm.DB) echo.HandlerFunc {
     }
 }
 
+// func Login(db *gorm.DB) echo.HandlerFunc {
+//     return func(c echo.Context) error {
+//         login := new(struct {
+//             Email    string `json:"email"`
+//             Password string `json:"password"`
+//         })
+
+//         if err := c.Bind(login); err != nil {
+//             return echo.NewHTTPError(http.StatusBadRequest, "Invalid request")
+//         }
+//         user := new(models.User)
+//         if err := db.Where("email = ?", login.Email).First(user).Error; err != nil {
+//             if err == gorm.ErrRecordNotFound {
+//                 return echo.NewHTTPError(http.StatusUnauthorized, "Invalid email or password")
+//             }
+//             return echo.NewHTTPError(http.StatusInternalServerError, "Internal server error")
+//         }
+
+//         err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(login.Password))
+//         if err != nil {
+//             return echo.NewHTTPError(http.StatusUnauthorized, "Invalid email or password")
+//         }
+
+
+//         JWT_SECRET := "12hg3v1h23vh12v3h1v3gh12"
+//         token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+//             "userID": user.ID,
+//             "email":  user.Email,
+//             "exp":    time.Now().Add(time.Hour * 24).Unix(),
+//         })
+
+//         tokenString, err := token.SignedString([]byte(JWT_SECRET))
+//         if err != nil {
+//             return echo.NewHTTPError(http.StatusInternalServerError, "Failed to generate token")
+//         }
+
+
+//         return c.JSON(http.StatusOK, echo.Map{
+//             "token": tokenString,
+//         })
+//     }
+// }
+
 func Login(db *gorm.DB) echo.HandlerFunc {
     return func(c echo.Context) error {
         login := new(struct {
@@ -73,6 +116,7 @@ func Login(db *gorm.DB) echo.HandlerFunc {
         if err := c.Bind(login); err != nil {
             return echo.NewHTTPError(http.StatusBadRequest, "Invalid request")
         }
+
         user := new(models.User)
         if err := db.Where("email = ?", login.Email).First(user).Error; err != nil {
             if err == gorm.ErrRecordNotFound {
@@ -86,19 +130,11 @@ func Login(db *gorm.DB) echo.HandlerFunc {
             return echo.NewHTTPError(http.StatusUnauthorized, "Invalid email or password")
         }
 
-
-        JWT_SECRET := "12hg3v1h23vh12v3h1v3gh12"
-        token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-            "userID": user.ID,
-            "email":  user.Email,
-            "exp":    time.Now().Add(time.Hour * 24).Unix(),
-        })
-
-        tokenString, err := token.SignedString([]byte(JWT_SECRET))
+        // Call GenerateToken to create a token for the user
+        tokenString, err := GenerateToken(user.ID, user.Email)
         if err != nil {
             return echo.NewHTTPError(http.StatusInternalServerError, "Failed to generate token")
         }
-
 
         return c.JSON(http.StatusOK, echo.Map{
             "token": tokenString,
@@ -107,9 +143,23 @@ func Login(db *gorm.DB) echo.HandlerFunc {
 }
 
 
+
+
+func GenerateToken(userID uint, email string) (string, error) {
+    JWT_SECRET := "12hg3v1h23vh12v3h1v3gh12"
+    token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+        "userID": userID,
+        "email":  email,
+        "exp":    time.Now().Add(time.Hour * 24).Unix(),
+    })
+    return token.SignedString([]byte(JWT_SECRET))
+}
+
+
+
 func DeleteAccount(db *gorm.DB) echo.HandlerFunc {
     return func(c echo.Context) error {
-        user := c.Get("user").(*jwt.Token)
+        user := c.Get("userID").(*jwt.Token)
         claims, ok := user.Claims.(jwt.MapClaims)
         if !ok {
             return echo.ErrUnauthorized
