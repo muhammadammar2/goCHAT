@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode } from "react";
+import apiClient from "../api/apiClient";
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -16,9 +17,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   );
 
   const login = () => setIsAuthenticated(true);
-  const logout = () => {
-    localStorage.removeItem("token");
-    setIsAuthenticated(false);
+  const logout = async () => {
+    try {
+      await apiClient.post("/logout");
+
+      localStorage.removeItem("token");
+
+      setIsAuthenticated(false);
+    } catch (error) {
+      console.error("Failed to log out:", error);
+    }
   };
 
   return (

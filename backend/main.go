@@ -40,7 +40,7 @@ func main() {
 	
 	if err != nil {
 		log.Fatalf("Failed to connect to the database: %v", err)
-	}
+	}	
 
 	err = db.AutoMigrate(&models.User{})
 	if err != nil {
@@ -58,8 +58,9 @@ func main() {
 	r := e.Group("")
 	r.Use(jwtMiddleware , blacklistMiddleware)
 	r.PUT("/update-profile" , handlers.UpdateProfile(db))
-	r.GET("/profile", handlers.GetUserProfile(db))
+	// r.GET("/profile", handlers.GetUserProfile(db))
 	r.DELETE("/delete", handlers.DeleteAccount(db))
 
 	e.Logger.Fatal(e.Start(":8080"))
 }
+	

@@ -224,40 +224,50 @@ func UpdateProfile(db *gorm.DB) echo.HandlerFunc {
     }
 }
 
-func GetUserProfile(db *gorm.DB) echo.HandlerFunc {
-    return func(c echo.Context) error {
-        log.Println("GetUserProfile handler called")
+// // GetUserProfile handler to fetch user's profile
+// func GetUserProfile(db *gorm.DB) echo.HandlerFunc {
+//     return func(c echo.Context) error {
+//         log.Println("GetUserProfile handler called")
 
-        // Retrieve the user (token) from the Echo context
-        user := c.Get("user")
-        if user == nil {
-            return echo.NewHTTPError(http.StatusUnauthorized, "Unauthorized")
-        }
+//         // Retrieve the user (token) from the Echo context
+//         user := c.Get("user")
+//         if user == nil {
+//             log.Println("User not found in context")
+//             return echo.NewHTTPError(http.StatusUnauthorized, "Unauthorized")
+//         }
 
-        // Parse the JWT token from context
-        token, ok := user.(*jwt.Token)
-        if !ok {
-            return echo.NewHTTPError(http.StatusUnauthorized, "Invalid token")
-        }
+//         // Parse the JWT token from context
+//         token, ok := user.(*jwt.Token)
+//         if !ok {
+//             log.Println("Failed to parse JWT token from context")
+//             return echo.NewHTTPError(http.StatusUnauthorized, "Invalid token")
+//         }
 
-        // Extract claims from the JWT token
-        claims, ok := token.Claims.(jwt.MapClaims)
-        if !ok || claims["username"] == nil {
-            return echo.NewHTTPError(http.StatusUnauthorized, "Invalid claims")
-        }
+//         // Extract claims from the JWT token
+//         claims, ok := token.Claims.(jwt.MapClaims)
+//         if !ok {
+//             log.Println("Failed to parse claims from JWT token")
+//             return echo.NewHTTPError(http.StatusUnauthorized, "Invalid claims")
+//         }
 
-        // Extract username from claims
-        username := claims["username"].(string)
-        log.Printf("Fetching profile for user: %s", username)
+//         // Extract username from claims
+//         username, ok := claims["username"].(string)
+//         if !ok || username == "" {
+//             log.Println("Username claim not found or invalid in JWT token")
+//             return echo.NewHTTPError(http.StatusUnauthorized, "Invalid claims")
+//         }
 
-        // Fetch the user profile from the database
-        var profile models.User
-        if err := db.Where("username = ?", username).First(&profile).Error; err != nil {
-            log.Printf("Error fetching the user profile: %v", err)
-            return echo.NewHTTPError(http.StatusNotFound, "User not found")
-        }
+//         log.Printf("Fetching profile for user: %s", username)
 
-        // Return the profile information as a JSON response
-        return c.JSON(http.StatusOK, profile)
-    }
-}
+//         // Fetch the user profile from the database
+//         var profile models.User
+//         if err := db.Where("username = ?", username).First(&profile).Error; err != nil {
+//             log.Printf("Error fetching the user profile for username %s: %v", username, err)
+//             return echo.NewHTTPError(http.StatusNotFound, "User not found")
+//         }
+
+//         // Return the profile information as a JSON response
+//         return c.JSON(http.StatusOK, profile)
+//     }
+// }
+
