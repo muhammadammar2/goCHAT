@@ -1,11 +1,8 @@
 package handlers
 
 import (
-	"bytes"
 	"dummy/models"
 	redisclient "dummy/redis"
-	"io"
-	"log"
 	"net/http"
 
 	"strings"
@@ -21,13 +18,12 @@ import (
 
 func Signup(db *gorm.DB) echo.HandlerFunc {
     return func(c echo.Context) error {
-        body, err := io.ReadAll(c.Request().Body)
-        if err != nil {
-            log.Printf("Error reading request body: %v", err)
-            return echo.NewHTTPError(http.StatusBadRequest, "Error reading request")
-        }
-        log.Printf("Raw request body: %s", string(body))
-        c.Request().Body = io.NopCloser(bytes.NewBuffer(body))
+        // body, err := io.ReadAll(c.Request().Body)
+        // if err != nil {
+        //     log.Printf("Eror reading request body: %v", err)
+        //     return echo.NewHTTPError(http.StatusBadRequest, "Error reading request")
+        // }
+        // c.Request().Body = io.NopCloser(bytes.NewBuffer(body))
 
         signupData := struct {
             Username string `json:"username"`
@@ -37,11 +33,8 @@ func Signup(db *gorm.DB) echo.HandlerFunc {
         }{}
 
         if err := c.Bind(&signupData); err != nil {
-            log.Printf("Error binding user data: %v", err)
             return echo.NewHTTPError(http.StatusBadRequest, "Invalid request data")
         }
-
-        log.Printf("Received signup data: %+v", signupData)
 
         if signupData.Password == "" {
             return echo.NewHTTPError(http.StatusBadRequest, "Password is required")
@@ -49,7 +42,6 @@ func Signup(db *gorm.DB) echo.HandlerFunc {
 
         hashPass, err := bcrypt.GenerateFromPassword([]byte(signupData.Password), bcrypt.DefaultCost)
         if err != nil {
-            log.Printf("Error hashing password: %v", err)
             return echo.NewHTTPError(http.StatusInternalServerError, "Error processing password")
         }
 
@@ -60,14 +52,9 @@ func Signup(db *gorm.DB) echo.HandlerFunc {
             Password: string(hashPass),
         }
 
-        log.Printf("Attempting to create user: %+v", user)
-
         if err := db.Create(user).Error; err != nil {
-            log.Printf("Error creating user in database: %v", err)
             return echo.NewHTTPError(http.StatusInternalServerError, "Error creating user")
         }
-
-        log.Printf("User created successfully: %s", user.Email)
 
         return c.JSON(http.StatusCreated, echo.Map{
             "message": "User created successfully",
@@ -84,16 +71,13 @@ func Login(db *gorm.DB) echo.HandlerFunc {
         })
 
         if err := c.Bind(login); err != nil {
-            log.Printf("Error binding login data: %v", err)
             return echo.NewHTTPError(http.StatusBadRequest, "Invalid request")
         }
         user := new(models.User)
         if err := db.Where("email = ?", login.Email).First(user).Error; err != nil {
             if err == gorm.ErrRecordNotFound {
-                log.Printf("User not found: %s", login.Email)
                 return echo.NewHTTPError(http.StatusUnauthorized, "Invalid email or password")
             }
-            log.Printf("Database error: %v", err)
             return echo.NewHTTPError(http.StatusInternalServerError, "Internal server error")
         }
 
@@ -112,11 +96,9 @@ func Login(db *gorm.DB) echo.HandlerFunc {
 
         tokenString, err := token.SignedString([]byte(JWT_SECRET))
         if err != nil {
-            log.Printf("Error generating token: %v", err)
             return echo.NewHTTPError(http.StatusInternalServerError, "Failed to generate token")
         }
 
-        log.Printf("Login successful for user: %s", user.Email)
 
         return c.JSON(http.StatusOK, echo.Map{
             "token": tokenString,
@@ -158,19 +140,14 @@ func Logout(client *redis.Client) echo.HandlerFunc {
         token := strings.TrimSpace(strings.TrimPrefix(authHeader, "Bearer "))
 
         if token == "" {
-            log.Println("No token provided for logout")
             return echo.NewHTTPError(http.StatusBadRequest, "No token provided")
         }
-
         expiration := 24 * time.Hour
 
         err := redisclient.BlacklistToken(client , token, expiration)
         if err != nil {
-            log.Printf("Error during logout: %v", err)
             return echo.NewHTTPError(http.StatusInternalServerError, "Could not blacklist token")
         }
-
-        log.Println("User logged out successfully")
         return c.JSON(http.StatusOK, map[string]string{"message": "Logged out successfully"})
     }
 }
