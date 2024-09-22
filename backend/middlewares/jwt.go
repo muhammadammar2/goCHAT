@@ -21,7 +21,7 @@ func JWTMiddleware(redisClient *redis.Client) echo.MiddlewareFunc {
         ContextKey:  "user",
         ErrorHandler: func(c echo.Context, err error) error {
             authHeader := c.Request().Header.Get("Authorization")
-            token := strings.TrimSpace(strings.TrimPrefix(authHeader, "Bearer "))
+            token := strings.TrimSpace(strings.TrimPrefix(authHeader , "Bearer "))
 
             if token == "" {
                 return echo.NewHTTPError(http.StatusUnauthorized, "Missing authorization token")
