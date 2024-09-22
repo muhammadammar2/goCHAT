@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import apiClient from "../../api/apiClient";
+// import apiClient, { RoomData } from "../../api/apiClient";
 import { useNavigate } from "react-router-dom";
 
 function CreateRoomForm() {
@@ -10,32 +10,68 @@ function CreateRoomForm() {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
+  // const handleSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   console.log("Creating room with token:", localStorage.getItem("token")); // Log the token
+
+  //   try {
+  //     console.log("Sending request to create room with data:", {
+  //       name,
+  //       description,
+  //       type: isPrivate ? "private" : "public",
+  //       code: isPrivate ? code : undefined,
+  //     });
+
+  //     await apiClient.post("/create-room", {
+  //       name,
+  //       description,
+  //       type: isPrivate ? "private" : "public",
+  //       code: isPrivate ? code : undefined,
+  //     });
+
+  //     console.log("Room successfully created!");
+  //     navigate("/profile");
+  //   } catch (err: any) {
+  //     console.error(
+  //       "Error occurred while creating room:",
+  //       err.response?.data || err.message
+  //     );
+  //     setError("Failed to create room. Please try again.");
+  //   }
+  // };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Creating room with token:", localStorage.getItem("token")); // Log the token
 
-    try {
-      console.log("Sending request to create room with data:", {
-        name,
-        description,
-        type: isPrivate ? "private" : "public",
-        code: isPrivate ? code : undefined,
-      });
+    const roomData = {
+      name,
+      description,
+      type: isPrivate ? "private" : "public",
+      code: isPrivate ? code : undefined,
+    };
 
-      await apiClient.post("/create-room", {
-        name,
-        description,
-        type: isPrivate ? "private" : "public",
-        code: isPrivate ? code : undefined,
+    try {
+      console.log("Sending request to create room with data:", roomData);
+
+      const response = await fetch("http://localhost:8080/create-room", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`, // Attach the token
+        },
+        body: JSON.stringify(roomData), // Send the room data
       });
+      console.log("i got the token");
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
       console.log("Room successfully created!");
       navigate("/profile");
     } catch (err: any) {
-      console.error(
-        "Error occurred while creating room:",
-        err.response?.data || err.message
-      );
+      console.error("Error occurred while creating room:", err.message);
       setError("Failed to create room. Please try again.");
     }
   };
