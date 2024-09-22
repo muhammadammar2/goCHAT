@@ -10,6 +10,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/redis/go-redis/v9"
 )
+
 func JWTMiddleware(redisClient *redis.Client) echo.MiddlewareFunc {
     JWT_SECRET := "12hg3v1h23vh12v3h1v3gh12"
     if JWT_SECRET == "" {
@@ -21,7 +22,9 @@ func JWTMiddleware(redisClient *redis.Client) echo.MiddlewareFunc {
         ContextKey:  "user",
         ErrorHandler: func(c echo.Context, err error) error {
             authHeader := c.Request().Header.Get("Authorization")
+            log.Printf("Authorization header: %s", authHeader) // Log the entire header
             token := strings.TrimSpace(strings.TrimPrefix(authHeader , "Bearer "))
+            log.Printf("Processed token: %s", token) // Log the processed token
 
             if token == "" {
                 return echo.NewHTTPError(http.StatusUnauthorized, "Missing authorization token")
@@ -34,9 +37,10 @@ func JWTMiddleware(redisClient *redis.Client) echo.MiddlewareFunc {
             if blacklisted {
                 return echo.ErrUnauthorized
             }
-            
+
             log.Printf("JWT Error: %v", err)
             return echo.ErrUnauthorized
         },
     })
 }
+

@@ -16,7 +16,7 @@ apiClient.interceptors.request.use(
     const token = localStorage.getItem("token");
     if (token) {
       config.headers["Authorization"] = `Bearer ${token}`;
-      console.log("Token attached to request:", `Bearer ${token}`); //k
+      console.log("Token attached to request:", `Bearer {token}`); //k
     } else {
       console.log("No token found in localStorage");
     }
