@@ -12,36 +12,39 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-func JWTMiddleware(redisClient *redis.Client) echo.MiddlewareFunc {     
-    JWT_SECRET := os.Getenv("JWT_SECRET")
-    if JWT_SECRET == "" {
-        log.Fatal("JWT secret is missing")
-    }
-    return echojwt.WithConfig(echojwt.Config{
-        SigningKey:  []byte(JWT_SECRET),
-        TokenLookup: "header:Authorization",
-        ContextKey:  "user",
-        ErrorHandler: func(c echo.Context, err error) error {
-            authHeader := c.Request().Header.Get("Authorization")
-            log.Printf("Authorization header: %s", authHeader) // Log the entire header
-            token := strings.TrimSpace(strings.TrimPrefix(authHeader , "Bearer "))
-            log.Printf("Processed token: %s", token) // Log the processed token
+func JWTMiddleware(redisClient *redis.Client) echo.MiddlewareFunc {
+	JWT_SECRET := os.Getenv("JWT_SECRET")
+	if JWT_SECRET == "" {
+		log.Fatal("JWT secret is missing")
+	}
 
-            if token == "" {
-                return echo.NewHTTPError(http.StatusUnauthorized, "Missing authorization token")
-            }
+	return echojwt.WithConfig(echojwt.Config{
+		SigningKey:  []byte(JWT_SECRET),
+		TokenLookup: "header:Authorization",
+		ContextKey:  "user",
+		ErrorHandler: func(c echo.Context, err error) error {
+			authHeader := c.Request().Header.Get("Authorization")
+			log.Printf("Authorization header: %s", authHeader)
 
-            blacklisted, redisErr := redisclient.IsTokenBlacklisted(redisClient, token)
-            if redisErr != nil {
-                return echo.NewHTTPError(http.StatusInternalServerError, "Redis Error")
-            }
-            if blacklisted {
-                return echo.ErrUnauthorized
-            }
+			token := strings.TrimSpace(strings.TrimPrefix(authHeader, "Bearer "))
+			log.Printf("Processed token: %s", token)
 
-            log.Printf("JWT Error: %v", err)
-            return echo.ErrUnauthorized
-        },
-    })
+			if token == "" {
+				return echo.NewHTTPError(http.StatusUnauthorized, "Missing authorization token")
+			}
+
+			blacklisted, redisErr := redisclient.IsTokenBlacklisted(redisClient, token)
+			if redisErr != nil {
+				log.Printf("Redis Error: %v", redisErr)
+				return echo.NewHTTPError(http.StatusInternalServerError, "Internal server error")
+			}
+			if blacklisted {
+				log.Printf("Token is blacklisted: %s", token)
+				return echo.ErrUnauthorized
+			}
+
+			log.Printf("JWT Error: %v", err)
+			return echo.ErrUnauthorized
+		},
+	})
 }
-

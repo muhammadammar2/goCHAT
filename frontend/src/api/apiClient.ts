@@ -35,7 +35,7 @@
 
 // export default apiClient;
 
-import axios from "axios";
+import axios, { AxiosRequestConfig } from "axios";
 
 const API_BASE_URL = "http://localhost:8080";
 
@@ -53,14 +53,25 @@ const getAuthToken = () => {
 };
 
 // Custom function for making API requests with token
-const apiRequest = async (config: any) => {
+const apiRequest = async (config: AxiosRequestConfig) => {
+  // Ensure the config is an object
+  const requestConfig: AxiosRequestConfig = { ...config }; // Clone config to avoid mutation
   const token = getAuthToken();
 
+  // Attach token if it exists
   if (token) {
-    config.headers["Authorization"] = token;
+    requestConfig.headers = {
+      ...requestConfig.headers, // Merge existing headers if any
+      Authorization: token,
+    };
   }
 
-  return await apiClient(config);
+  try {
+    return await apiClient(requestConfig);
+  } catch (error) {
+    console.error("API request error:", error);
+    throw error; // Rethrow the error for further handling
+  }
 };
 
 export { apiClient, apiRequest };

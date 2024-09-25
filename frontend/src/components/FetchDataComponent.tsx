@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
-import apiClient from "../api/apiClient";
+// import apiClient from "../api/apiClient";
+import { apiClient } from "../api/apiClient"; // Import the apiRequest function
 
 const FetchDataComponent: React.FC = () => {
   useEffect(() => {

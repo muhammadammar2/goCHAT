@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import apiClient from "../../api/apiClient";
+import { apiClient } from "../../api/apiClient";
+// import apiClient from "../../api/apiClient";
 
 function JoinRoom() {
   const [rooms, setRooms] = useState<any[]>([]);

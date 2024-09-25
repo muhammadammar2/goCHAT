@@ -1,6 +1,8 @@
 import React, { useState } from "react";
-import apiClient from "../../api/apiClient";
+// import apiClient from "../../api/apiClient";
+
 import { useNavigate } from "react-router-dom";
+import { apiClient } from "../../api/apiClient";
 
 function Register() {
   const [name, setName] = useState("");
