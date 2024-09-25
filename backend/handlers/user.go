@@ -4,11 +4,12 @@ import (
 	"dummy/models"
 	redisclient "dummy/redis"
 	"net/http"
+	"os"
 
 	"strings"
 	"time"
 
-	"github.com/golang-jwt/jwt/v4"
+	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
 	"github.com/redis/go-redis/v9"
 	"golang.org/x/crypto/bcrypt"
@@ -87,7 +88,7 @@ func Signup(db *gorm.DB) echo.HandlerFunc {
 //         }
 
 
-//         JWT_SECRET := "12hg3v1h23vh12v3h1v3gh12"
+//         JWT_SECRET := "3287y48327483264b32864cc3b462c3"
 //         token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 //             "userID": user.ID,
 //             "email":  user.Email,
@@ -105,6 +106,72 @@ func Signup(db *gorm.DB) echo.HandlerFunc {
 //         })
 //     }
 // }
+
+func GenerateToken(userID uint, email string) (string, error) {
+    JWT_SECRET := os.Getenv("JWT_SECRET")
+    token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+        "userID": userID,
+        "email":  email,
+        "exp":    time.Now().Add(time.Hour * 24).Unix(),
+    })
+    return token.SignedString([]byte(JWT_SECRET))
+}
+
+
+func ValidateToken(c echo.Context) error {
+	// Extract token from Authorization header
+	tokenString := c.Request().Header.Get("Authorization")
+	if tokenString == "" {
+		return c.JSON(http.StatusUnauthorized, map[string]string{
+			"message": "Missing token",
+		})
+	}
+
+	// Parse and validate the token
+	token, err := jwt.Parse(tokenString[len("Bearer "):], func(token *jwt.Token) (interface{}, error) {
+		// Check if the token's signing method matches
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, echo.NewHTTPError(http.StatusUnauthorized, "Invalid signing method")
+		}
+		// Return the secret key
+		return []byte("JWT_SECRET"), nil
+	})
+
+	if err != nil || !token.Valid {
+		return c.JSON(http.StatusUnauthorized, map[string]string{
+			"message": "Invalid or expired token",
+		})
+	}
+
+	// You can also check if the token is blacklisted (if using Redis-based token blacklisting)
+	// Assuming you have a `CheckBlacklistedToken` function
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok || !token.Valid {
+		return c.JSON(http.StatusUnauthorized, map[string]string{
+			"message": "Invalid token",
+		})
+	}
+
+	// Check if token is expired
+	expiration := claims["exp"].(float64)
+	if time.Unix(int64(expiration), 0).Before(time.Now()) {
+		return c.JSON(http.StatusUnauthorized, map[string]string{
+			"message": "Token is expired",
+		})
+	}
+
+	// Optional: Check if token is blacklisted
+	// if CheckBlacklistedToken(tokenString) {
+	//     return c.JSON(http.StatusUnauthorized, map[string]string{
+	//         "message": "Token has been blacklisted",
+	//     })
+	// }
+
+	// If the token is valid, return success response
+	return c.JSON(http.StatusOK, map[string]string{
+		"message": "Token is valid",
+	})
+}
 
 func Login(db *gorm.DB) echo.HandlerFunc {
     return func(c echo.Context) error {
@@ -142,17 +209,22 @@ func Login(db *gorm.DB) echo.HandlerFunc {
     }
 }
 
+func Logout(client *redis.Client) echo.HandlerFunc {
+    return func(c echo.Context) error {
+        authHeader := c.Request().Header.Get("Authorization")
+        token := strings.TrimSpace(strings.TrimPrefix(authHeader, "Bearer "))
 
+        if token == "" {
+            return echo.NewHTTPError(http.StatusBadRequest, "No token provided")
+        }
+        expiration := 24 * time.Hour
 
-
-func GenerateToken(userID uint, email string) (string, error) {
-    JWT_SECRET := "12hg3v1h23vh12v3h1v3gh12"
-    token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-        "userID": userID,
-        "email":  email,
-        "exp":    time.Now().Add(time.Hour * 24).Unix(),
-    })
-    return token.SignedString([]byte(JWT_SECRET))
+        err := redisclient.BlacklistToken(client , token, expiration)
+        if err != nil {
+            return echo.NewHTTPError(http.StatusInternalServerError, "Could not blacklist token")
+        }
+        return c.JSON(http.StatusOK, map[string]string{"message": "Logged out successfully"})
+    }
 }
 
 
@@ -181,24 +253,6 @@ func DeleteAccount(db *gorm.DB) echo.HandlerFunc {
         return c.JSON(http.StatusOK, echo.Map{
             "message": "Account deleted successfully",
         })
-    }
-}
-
-func Logout(client *redis.Client) echo.HandlerFunc {
-    return func(c echo.Context) error {
-        authHeader := c.Request().Header.Get("Authorization")
-        token := strings.TrimSpace(strings.TrimPrefix(authHeader, "Bearer "))
-
-        if token == "" {
-            return echo.NewHTTPError(http.StatusBadRequest, "No token provided")
-        }
-        expiration := 24 * time.Hour
-
-        err := redisclient.BlacklistToken(client , token, expiration)
-        if err != nil {
-            return echo.NewHTTPError(http.StatusInternalServerError, "Could not blacklist token")
-        }
-        return c.JSON(http.StatusOK, map[string]string{"message": "Logged out successfully"})
     }
 }
 

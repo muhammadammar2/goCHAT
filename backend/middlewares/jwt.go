@@ -4,6 +4,7 @@ import (
 	redisclient "dummy/redis"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 
 	echojwt "github.com/labstack/echo-jwt"
@@ -11,8 +12,8 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-func JWTMiddleware(redisClient *redis.Client) echo.MiddlewareFunc {
-    JWT_SECRET := "12hg3v1h23vh12v3h1v3gh12"
+func JWTMiddleware(redisClient *redis.Client) echo.MiddlewareFunc {     
+    JWT_SECRET := os.Getenv("JWT_SECRET")
     if JWT_SECRET == "" {
         log.Fatal("JWT secret is missing")
     }

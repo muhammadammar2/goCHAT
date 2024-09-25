@@ -51,6 +51,7 @@ func main() {
 	jwtMiddleware := middlewares.JWTMiddleware(redisClient)
 	blacklistMiddleware := middlewares.TokenBlacklistMiddleware(redisClient)
 
+	e.POST("/validate-token" , handlers.ValidateToken)
 	e.POST("/signup", handlers.Signup(db))
 	e.POST("/login", handlers.Login(db))
 	e.POST("/logout" , handlers.Logout(redisClient))

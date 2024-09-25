@@ -1,7 +1,33 @@
 import React, { useState } from "react";
-import apiClient from "../../api/apiClient";
+import { apiRequest } from "../../api/apiClient";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../auth/AuthContext";
+
+// function Login() {
+//   const [email, setEmail] = useState("");
+//   const [password, setPassword] = useState("");
+//   const [error, setError] = useState("");
+//   const navigate = useNavigate();
+//   const { login } = useAuth();
+
+//   const handleSubmit = async (e: React.FormEvent) => {
+//     e.preventDefault();
+
+//     try {
+//       const response = await apiClient.post("/login", { email, password });
+//       const { token } = response.data;
+
+//       localStorage.setItem("token", token);
+//       login();
+//       navigate("/room-options");
+//     } catch (err: any) {
+//       console.error(err.response?.data || err.message);
+//       setError(
+//         err.response?.data?.message ||
+//           "Login failed. Please check your credentials."
+//       );
+//     }
+//   };
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -14,7 +40,11 @@ function Login() {
     e.preventDefault();
 
     try {
-      const response = await apiClient.post("/login", { email, password });
+      const response = await apiRequest({
+        method: "post",
+        url: "/login",
+        data: { email, password },
+      });
       const { token } = response.data;
 
       localStorage.setItem("token", token);
