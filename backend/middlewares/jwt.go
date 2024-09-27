@@ -14,7 +14,7 @@ func JWTMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 			return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Missing token"})
 		}
 
-		claims, err := utils.VerifyJWT(token)
+		claims , err := utils.VerifyJWT(token)
 		if err != nil {
 			return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Invalid token"})
 		}

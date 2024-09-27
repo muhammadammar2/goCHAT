@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/muhammadammar2/goCHAT/config"
+	"github.com/muhammadammar2/goCHAT/redis"
 
 	"github.com/muhammadammar2/goCHAT/routes"
 
@@ -25,6 +26,8 @@ func main() {
 	e := echo.New()
 
 	db := config.ConnectDB()
+
+	redis.ConnectRedis()
 
 	routes.SetupRoutes(e, db)
 

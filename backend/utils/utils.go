@@ -35,6 +35,7 @@ func GenerateJWT(userID uint) (string, error) {
     return token.SignedString([]byte(os.Getenv("JWT_SECRET"))) 
 }
 
+
 func VerifyJWT(tokenString string) (*Claims, error) {
     claims := &Claims{}
     token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
@@ -47,3 +48,4 @@ func VerifyJWT(tokenString string) (*Claims, error) {
 
     return claims, nil
 }
+
