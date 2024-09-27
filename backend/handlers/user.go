@@ -10,6 +10,8 @@ import (
 	"github.com/go-playground/validator"
 	"github.com/labstack/echo"
 	"github.com/muhammadammar2/goCHAT/models"
+	"github.com/muhammadammar2/goCHAT/repository"
+
 	"github.com/muhammadammar2/goCHAT/redis"
 	"github.com/muhammadammar2/goCHAT/utils"
 	"golang.org/x/crypto/bcrypt"
@@ -109,3 +111,68 @@ func Logout(c echo.Context) error {
 
     return c.JSON(http.StatusOK, map[string]string{"message": "Logged out successfully"})
 }
+
+func GetUserProfile(db *gorm.DB) echo.HandlerFunc {
+    return func(c echo.Context) error {
+        userID := c.Get("user_id")
+        if userID == nil {
+            return c.JSON(http.StatusUnauthorized, map[string]string{"error": "User not authenticated"})
+        }
+
+        user, err := repository.GetUserByID(db, userID.(string)) 
+        if err != nil {
+            return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to fetch profile"})
+        }
+
+        return c.JSON(http.StatusOK, user)
+    }
+}
+
+
+// func UpdateProfile(db *gorm.DB) echo.HandlerFunc {
+//     return func(c echo.Context) error {
+//         user := c.Get("user").(*jwt.Token)
+//         claims, ok := user.Claims.(jwt.MapClaims)
+//         if !ok || !user.Valid {
+//             return echo.ErrUnauthorized
+//         }
+
+//         email, ok := claims["email"].(string)
+//         if !ok {
+//             return echo.NewHTTPError(http.StatusUnauthorized, "Invalid token claims")
+//         }
+
+//         var existingUser models.User
+//         if err := db.Where("email = ?", email).First(&existingUser).Error; err != nil {
+//             return echo.NewHTTPError(http.StatusNotFound, "User not found")
+//         }
+
+//         updatedData := new(models.User)
+//         if err := c.Bind(updatedData); err != nil {
+//             return echo.NewHTTPError(http.StatusBadRequest, "Invalid request payload")
+//         }
+
+//         if updatedData.Username != "" && updatedData.Username != existingUser.Username {
+//             if err := db.Where("username = ?", updatedData.Username).First(&models.User{}).Error; err == nil {
+//                 return echo.NewHTTPError(http.StatusConflict, "Username already taken")
+//             }
+//             existingUser.Username = updatedData.Username
+//         }
+
+//         existingUser.Name = updatedData.Name
+
+//         if updatedData.Password != "" {
+//             hashPass, err := bcrypt.GenerateFromPassword([]byte(updatedData.Password), bcrypt.DefaultCost)
+//             if err != nil {
+//                 return echo.NewHTTPError(http.StatusInternalServerError, "Error hashing password")
+//             }
+//             existingUser.Password = string(hashPass)
+//         }
+
+//         if err := db.Save(&existingUser).Error; err != nil {
+//             return echo.NewHTTPError(http.StatusInternalServerError, "Failed to update profile")
+//         }
+
+//         return c.JSON(http.StatusOK, existingUser)
+//     }
+// }

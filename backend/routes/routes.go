@@ -26,7 +26,7 @@ func SetupRoutes(e *echo.Echo, db *gorm.DB) {
 
 	// r.PUT("/update-profile", handlers.UpdateProfile(db))
     // r.POST("/create-room", handlers.CreateRoom(db))
-    // r.GET("/profile", handlers.GetUserProfile(db)) 
+    r.GET("/profile", handlers.GetUserProfile(db)) 
     // r.DELETE("/delete", handlers.DeleteAccount(db))
 	r.POST("/logout" , handlers.Logout)
 
