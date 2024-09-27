@@ -7,6 +7,7 @@ import (
 	"github.com/labstack/echo"
 	"github.com/muhammadammar2/goCHAT/models"
 	"github.com/muhammadammar2/goCHAT/utils"
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
@@ -42,3 +43,36 @@ func Signup (c echo.Context , db * gorm.DB) error  {
 	return c.JSON(http.StatusOK, map[string]string{"message": "User created successfully!"})
 
 } 
+
+
+func Login(c echo.Context, db *gorm.DB) error {
+    var loginRequest models.LoginRequest
+
+    if err := c.Bind(&loginRequest); err != nil {
+        return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid input"})
+    }
+
+    if err := validate.Struct(&loginRequest); err != nil {
+        return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid input data"})
+    }
+
+    var user models.User
+
+    if err := db.Where("email = ?", loginRequest.Email).First(&user).Error; err != nil {
+        return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Invalid credentials"})
+    }
+
+    if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(loginRequest.Password)); err != nil {
+        return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Invalid credentials"})
+    }
+
+    tokenString, err := utils.GenerateJWT(user.ID)
+    if err != nil {
+        return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to generate token"})
+    }
+
+    return c.JSON(http.StatusOK, map[string]interface{}{
+        "message": "Login successful",
+        "token":   tokenString,
+    })
+}
