@@ -10,4 +10,8 @@ func SetupRoutes(e *echo.Echo, db *gorm.DB) {
 	e.POST("/signup", func(c echo.Context) error {
 		return handlers.Signup(c, db)
 	})
+
+	e.POST("/login" , func(c echo.Context) error {
+		return handlers.Login(c , db)
+	})
 }
