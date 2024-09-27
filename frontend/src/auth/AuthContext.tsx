@@ -5,8 +5,7 @@
 //   ReactNode,
 //   useEffect,
 // } from "react";
-// import { apiClient } from "../api/apiClient";
-// // import apiClient from "../api/apiClient";
+// import apiClient from "../api/apiClient";
 
 // interface AuthContextType {
 //   isAuthenticated: boolean;
@@ -68,18 +67,12 @@
 //   return context;
 // };
 
-import React, {
-  createContext,
-  useContext,
-  useState,
-  ReactNode,
-  useEffect,
-} from "react";
-import { apiRequest } from "../api/apiClient"; // Import the apiRequest function
+import React, { createContext, useContext, useState, ReactNode } from "react";
+import apiClient from "../api/apiClient";
 
 interface AuthContextType {
   isAuthenticated: boolean;
-  login: () => void;
+  login: () => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -92,33 +85,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     !!localStorage.getItem("token")
   );
 
-  useEffect(() => {
-    const validateToken = async () => {
-      const token = localStorage.getItem("token");
-      if (token) {
-        try {
-          await apiRequest({
-            method: "post",
-            url: "/validate-token",
-            data: { token },
-          });
-        } catch (error) {
-          console.error("Token validation failed:", error);
-          logout();
-        }
-      }
-    };
-
-    validateToken();
-  }, []);
-
   const login = async () => {
     setIsAuthenticated(true);
   };
 
   const logout = async () => {
     try {
-      await apiRequest({ method: "post", url: "/logout" });
+      await apiClient.post("/logout");
       localStorage.removeItem("token");
       setIsAuthenticated(false);
     } catch (error) {

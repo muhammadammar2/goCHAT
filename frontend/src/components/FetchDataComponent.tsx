@@ -1,17 +1,23 @@
 import React, { useEffect } from "react";
-// import apiClient from "../api/apiClient";
-import { apiClient } from "../api/apiClient"; // Import the apiRequest function
+import apiClient from "../api/apiClient";
 
 const FetchDataComponent: React.FC = () => {
   useEffect(() => {
-    apiClient
-      .get("/api/resource", {
-        headers: {
-          Authorization: "12hg3v1h23vh12v3h1v3gh12",
-        },
-      })
-      .then((response) => console.log(response.data))
-      .catch((error) => console.error("Error:", error));
+    const fetchData = async () => {
+      const token = localStorage.getItem("token");
+      try {
+        const response = await apiClient.get("/api/resource", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        console.log(response.data);
+      } catch (error) {
+        console.error("Error:", error);
+      }
+    };
+
+    fetchData();
   }, []);
 
   return (

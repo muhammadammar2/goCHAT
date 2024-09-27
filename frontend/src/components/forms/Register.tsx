@@ -1,8 +1,7 @@
 import React, { useState } from "react";
-// import apiClient from "../../api/apiClient";
+import apiClient from "../../api/apiClient";
 
 import { useNavigate } from "react-router-dom";
-import { apiClient } from "../../api/apiClient";
 
 function Register() {
   const [name, setName] = useState("");
@@ -48,7 +47,7 @@ function Register() {
       const response = await register(name, username, email, password);
       console.log("Registration response:", response);
 
-      if (response.status === 201) {
+      if (response.status === 200 || response.status === 201) {
         setSuccess("Registration successful!");
         setTimeout(() => {
           navigate("/login");
@@ -70,7 +69,6 @@ function Register() {
       }
     }
   };
-
   return (
     <div className="w-full max-w-md">
       <form
@@ -88,7 +86,7 @@ function Register() {
 
         <div className="mb-4">
           <input
-            className="shadow appearance-none border border-gray-700 rounded w-full py-3 px-4 text-gray-300 leading-tight focus:outline-none focus:border-blue-500 bg-gray-700 transition duration-300"
+            className="shadow appearance-none border border-gray-700 rounded w-fu ll py-3 px-4 text-gray-300 leading-tight focus:outline-none focus:border-blue-500 bg-gray-700 transition duration-300"
             type="text"
             placeholder="Name"
             value={name}
