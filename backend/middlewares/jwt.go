@@ -1,38 +1,26 @@
 package middlewares
 
 import (
-	"os"
-	"time"
+	"net/http"
 
-	"github.com/dgrijalva/jwt-go"
+	"github.com/labstack/echo"
+	"github.com/muhammadammar2/goCHAT/utils"
 )
 
-type Claims struct {
-    UserID uint `json:"user_id"`
-    jwt.StandardClaims
-}
+func JWTMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		token := c.Request().Header.Get("Authorization")
+		if token == "" {
+			return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Missing token"})
+		}
 
-func GenerateJWT(userID uint) (string, error) {
-    claims := Claims{
-        UserID: userID,
-        StandardClaims: jwt.StandardClaims{
-            ExpiresAt: time.Now().Add(24 * time.Hour).Unix(), 
-        },
-    }
+		claims, err := utils.VerifyJWT(token)
+		if err != nil {
+			return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Invalid token"})
+		}
 
-    token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-    return token.SignedString([]byte(os.Getenv("JWT_SECRET"))) 
-}
+		c.Set("user_id", claims.UserID)
 
-func VerifyJWT(tokenString string) (*Claims, error) {
-    claims := &Claims{}
-    token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
-        return []byte(os.Getenv("JWT_SECRET")), nil 
-    })
-
-    if err != nil || !token.Valid {
-        return nil, err
-    }
-
-    return claims, nil
+		return next(c)
+	}
 }
