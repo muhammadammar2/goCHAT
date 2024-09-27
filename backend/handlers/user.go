@@ -3,7 +3,6 @@ package handlers
 // github.com/dgrijalva/jwt-go
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -93,8 +92,6 @@ func Logout(c echo.Context) error {
     }
 
     tokenString = strings.TrimPrefix(tokenString, "Bearer ")
-
-    fmt.Println("Token String for logout:", tokenString)
 
     claims, err := utils.VerifyJWT(tokenString)
     if err != nil {
