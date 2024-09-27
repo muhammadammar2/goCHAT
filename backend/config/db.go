@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/muhammadammar2/goCHAT/models"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -14,5 +15,13 @@ func ConnectDB() *gorm.DB {
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
+
+	err = db.AutoMigrate(&models.User{})  
+	if err != nil {
+		log.Fatalf("Failed to auto migrate models: %v", err)
+	}
+
 	return db
-}
+}	
+
+
