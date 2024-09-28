@@ -10,7 +10,6 @@ import (
 	"github.com/go-playground/validator"
 	"github.com/labstack/echo"
 	"github.com/muhammadammar2/goCHAT/models"
-	"github.com/muhammadammar2/goCHAT/repository"
 
 	"github.com/muhammadammar2/goCHAT/redis"
 	"github.com/muhammadammar2/goCHAT/utils"
@@ -112,21 +111,21 @@ func Logout(c echo.Context) error {
     return c.JSON(http.StatusOK, map[string]string{"message": "Logged out successfully"})
 }
 
-func GetUserProfile(db *gorm.DB) echo.HandlerFunc {
-    return func(c echo.Context) error {
-        userID := c.Get("user_id")
-        if userID == nil {
-            return c.JSON(http.StatusUnauthorized, map[string]string{"error": "User not authenticated"})
-        }
+// func GetUserProfile(db *gorm.DB) echo.HandlerFunc {
+//     return func(c echo.Context) error {
+//         userID := c.Get("user_id")
+//         if userID == nil {
+//             return c.JSON(http.StatusUnauthorized, map[string]string{"error": "User not authenticated"})
+//         }
 
-        user, err := repository.GetUserByID(db, userID.(string)) 
-        if err != nil {
-            return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to fetch profile"})
-        }
+//         user, err := repository.GetUserByID(db, userID.(string)) 
+//         if err != nil {
+//             return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to fetch profile"})
+//         }
 
-        return c.JSON(http.StatusOK, user)
-    }
-}
+//         return c.JSON(http.StatusOK, user)
+//     }
+// }
 
 
 // func UpdateProfile(db *gorm.DB) echo.HandlerFunc {
