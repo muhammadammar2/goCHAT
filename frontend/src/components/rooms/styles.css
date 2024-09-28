@@ -1,0 +1,47 @@
+.swiper {
+  width: 100%;
+  height: 100%;
+}
+
+.swiper-slide {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+/* Background colors */
+.bg-gray-900 {
+  background-color: #1a202c;
+}
+
+.bg-gray-800 {
+  background-color: #2d3748;
+}
+
+/* Text colors */
+.text-blue-400 {
+  color: #63b3ed;
+}
+
+.text-gray-300 {
+  color: #e2e8f0;
+}
+
+.text-gray-500 {
+  color: #a0aec0;
+}
+
+.text-gray-400 {
+  color: #cbd5e0;
+}
+
+/* Button transition */
+button {
+  transition: background-color 0.3s;
+}
+
+/* Add margin to swiper-pagination for space */
+.swiper-pagination {
+  margin-top: 20px; /* Increase space between button and dots */
+}

@@ -1,16 +1,34 @@
 import React, { useState, useEffect } from "react";
 import apiClient from "../../api/apiClient";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation, Pagination } from "swiper/modules"; // Import modules from swiper/modules
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
+import "./styles.css";
 
 function JoinRoom() {
   const [rooms, setRooms] = useState<any[]>([]);
   const [error, setError] = useState("");
-  const [roomCode, setRoomCode] = useState<{ [key: string]: string }>({});
 
   useEffect(() => {
     async function fetchRooms() {
       try {
         const response = await apiClient.get("/rooms");
-        setRooms(response.data);
+        console.log("Fetched rooms:", response.data);
+
+        // Sort rooms by CreatedAt timestamp (newest first)
+        const sortedRooms = response.data.sort((a: any, b: any) => {
+          return (
+            new Date(b.CreatedAt).getTime() - new Date(a.CreatedAt).getTime()
+          );
+        });
+
+        // Limit to the 7 most recent rooms
+        const recentRooms = sortedRooms.slice(0, 7);
+
+        setRooms(recentRooms);
+        console.log("Recent rooms:", recentRooms);
       } catch (err: any) {
         console.error(err.response?.data || err.message);
         setError("Failed to fetch rooms. Please try again.");
@@ -19,63 +37,43 @@ function JoinRoom() {
     fetchRooms();
   }, []);
 
-  const handleJoinRoom = async (roomId: string, roomType: string) => {
-    const code = roomType === "private" ? roomCode[roomId] : undefined;
-    try {
-      const response = await apiClient.post("/join-room", {
-        room_id: roomId,
-        code,
-      });
-      alert(response.data.message);
-    } catch (err: any) {
-      console.error(err.response?.data || err.message);
-      setError(
-        err.response?.data?.error || "Failed to join room. Please try again."
-      );
-    }
-  };
-
   return (
-    <div className="w-full max-w-md">
-      <div className="bg-gray-800 shadow-lg rounded-lg px-8 pt-6 pb-8 mb-4">
-        <h2 className="text-3xl mb-6 text-center font-bold text-blue-400">
+    <div className="w-full max-w-lg mx-auto">
+      <div className="bg-gray-900 rounded-lg p-6 shadow-lg">
+        <h2 className="text-3xl mb-4 text-center font-bold text-blue-400">
           Join a Room
         </h2>
         {error && <p className="text-red-500 text-center mb-4">{error}</p>}
-        <ul>
-          {rooms.length > 0 ? (
-            rooms.map((room: any) => (
-              <li key={room.ID} className="mb-4">
-                <div className="bg-gray-700 p-4 rounded">
-                  <h3 className="text-xl font-bold text-white">{room.name}</h3>
+
+        {rooms.length > 0 ? (
+          <Swiper
+            spaceBetween={30}
+            slidesPerView={1}
+            navigation={true} // Enable navigation
+            pagination={{ clickable: true }} // Enable pagination
+            modules={[Navigation, Pagination]} // Register Swiper modules
+          >
+            {rooms.map((room: any) => (
+              <SwiperSlide key={room.id}>
+                <div className="bg-gray-800 p-6 rounded-lg shadow-md">
+                  <h3 className="text-2xl font-bold text-white">{room.name}</h3>
                   <p className="text-gray-300">{room.description}</p>
-                  <p className="text-gray-500">
+                  <p className="text-gray-400">
                     Type: {room.room_type === "private" ? "Private" : "Public"}
                   </p>
-                  {room.room_type === "private" && (
-                    <input
-                      type="text"
-                      placeholder="Enter room code"
-                      value={roomCode[room.ID] || ""}
-                      onChange={(e) =>
-                        setRoomCode({ ...roomCode, [room.ID]: e.target.value })
-                      }
-                      className="mt-2 mb-2 p-2 rounded border border-gray-600"
-                    />
-                  )}
-                  <button
-                    className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-2"
-                    onClick={() => handleJoinRoom(room.ID, room.room_type)}
-                  >
+                  <p className="text-gray-500">
+                    Created At: {new Date(room.CreatedAt).toLocaleString()}
+                  </p>
+                  <button className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4">
                     Join Room
                   </button>
                 </div>
-              </li>
-            ))
-          ) : (
-            <p className="text-gray-300 text-center">No rooms available.</p>
-          )}
-        </ul>
+              </SwiperSlide>
+            ))}
+          </Swiper>
+        ) : (
+          <p className="text-gray-300 text-center">No rooms available.</p>
+        )}
       </div>
     </div>
   );
