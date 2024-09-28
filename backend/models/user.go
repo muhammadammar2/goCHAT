@@ -8,4 +8,5 @@ type User struct {
     Email       string `gorm:"unique;not null"`
 	Name        string `gorm:"not null"`
     Password    string `gorm:"not null"`
+	Rooms    []Room `gorm:"foreignKey:OwnerID"`
 }

@@ -42,27 +42,34 @@ function CreateRoomForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Creating room with token:", localStorage.getItem("token")); // Log the token
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      console.error("No token found");
+      setError("You are not authenticated.");
+      return;
+    }
+
+    console.log("Creating room with token:", token);
 
     const roomData = {
       name,
       description,
-      type: isPrivate ? "private" : "public",
-      code: isPrivate ? code : undefined,
+      room_type: isPrivate ? "private" : "public",
+      room_code: isPrivate ? code : undefined,
     };
 
     try {
       console.log("Sending request to create room with data:", roomData);
 
-      const response = await fetch("http://localhost:8080/create-room", {
+      const response = await fetch("http://localhost:6969/create-room", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`, // Attach the token
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(roomData), // Send the room data
+        body: JSON.stringify(roomData),
       });
-      console.log("i got the token");
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);

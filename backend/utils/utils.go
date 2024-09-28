@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/go-playground/validator/v10"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -49,17 +50,15 @@ func VerifyJWT(tokenString string) (*Claims, error) {
     return claims, nil
 }
 
-// func VerifyJWT(token string) (*Claims, error) {
-// 	tkn, err := jwt.ParseWithClaims(token, &Claims{}, func(t *jwt.Token) (interface{}, error) {
-// 		return []byte("JWT_SECRET"), nil 
-// 	})
 
-// 	if err != nil {
-// 		return nil, err
-// 	}
+type Validator struct {
+    validator *validator.Validate
+}
 
-// 	if claims, ok := tkn.Claims.(*Claims); ok && tkn.Valid {
-// 		return claims, nil
-// 	}
+func NewValidator() *Validator {
+    return &Validator{validator: validator.New()}
+}
 
-// 	return nil, errors.New("invalid token")
+func (v *Validator) Validate(i interface{}) error {
+    return v.validator.Struct(i)
+}

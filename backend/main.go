@@ -7,6 +7,7 @@ import (
 	"github.com/muhammadammar2/goCHAT/config"
 	"github.com/muhammadammar2/goCHAT/middlewares"
 	"github.com/muhammadammar2/goCHAT/redis"
+	"github.com/muhammadammar2/goCHAT/utils"
 
 	"github.com/muhammadammar2/goCHAT/routes"
 
@@ -29,6 +30,8 @@ func main() {
 	e.Use(middlewares.CORSMiddleware())
 
 	db := config.ConnectDB()
+
+	e.Validator = utils.NewValidator()
 
 	redis.ConnectRedis()
 
