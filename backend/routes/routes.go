@@ -29,5 +29,7 @@ func SetupRoutes(e *echo.Echo, db *gorm.DB) {
     // r.GET("/profile", handlers.GetUserProfile(db)) 
     // r.DELETE("/delete", handlers.DeleteAccount(db))
 	r.POST("/logout" , handlers.Logout)
+	r.GET("/rooms", handlers.GetRooms(db))         
+    r.POST("/join-room", handlers.JoinRoom(db)) 
 
 }
