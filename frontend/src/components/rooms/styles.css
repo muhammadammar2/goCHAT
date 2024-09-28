@@ -10,7 +10,6 @@
   text-align: center;
 }
 
-/* Background colors */
 .bg-gray-900 {
   background-color: #1a202c;
 }
@@ -19,7 +18,6 @@
   background-color: #2d3748;
 }
 
-/* Text colors */
 .text-blue-400 {
   color: #63b3ed;
 }
@@ -36,12 +34,6 @@
   color: #cbd5e0;
 }
 
-/* Button transition */
 button {
   transition: background-color 0.3s;
-}
-
-/* Add margin to swiper-pagination for space */
-.swiper-pagination {
-  margin-top: 20px; /* Increase space between button and dots */
 }

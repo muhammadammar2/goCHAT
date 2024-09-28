@@ -38,16 +38,19 @@ function JoinRoom() {
   }, []);
 
   return (
-    <div className="w-full max-w-lg mx-auto">
-      <div className="bg-gray-900 rounded-lg p-6 shadow-lg">
-        <h2 className="text-3xl mb-4 text-center font-bold text-blue-400">
+    <div className="w-full max-w-xl mx-auto">
+      {" "}
+      {/* Increased max width for more space */}
+      <div className="bg-gray-900 rounded-lg p-8 shadow-xl">
+        {" "}
+        {/* Increased padding and shadow */}
+        <h2 className="text-3xl mb-6 text-center font-bold text-blue-400">
           Join a Room
         </h2>
         {error && <p className="text-red-500 text-center mb-4">{error}</p>}
-
         {rooms.length > 0 ? (
           <Swiper
-            spaceBetween={30}
+            spaceBetween={40}
             slidesPerView={1}
             navigation={true} // Enable navigation
             pagination={{ clickable: true }} // Enable pagination
@@ -55,16 +58,19 @@ function JoinRoom() {
           >
             {rooms.map((room: any) => (
               <SwiperSlide key={room.id}>
-                <div className="bg-gray-800 p-6 rounded-lg shadow-md">
+                <div className="bg-gray-800 p-8 rounded-lg shadow-lg">
                   <h3 className="text-2xl font-bold text-white">{room.name}</h3>
-                  <p className="text-gray-300">{room.description}</p>
-                  <p className="text-gray-400">
+                  <p className="text-gray-300 mt-2">{room.description}</p>{" "}
+                  {/* Added margin for better spacing */}
+                  <p className="text-gray-400 mt-1">
                     Type: {room.room_type === "private" ? "Private" : "Public"}
                   </p>
-                  <p className="text-gray-500">
+                  <p className="text-gray-500 mt-1">
                     Created At: {new Date(room.CreatedAt).toLocaleString()}
                   </p>
-                  <button className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4">
+                  <button className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded mt-6">
+                    {" "}
+                    {/* Larger button */}
                     Join Room
                   </button>
                 </div>
