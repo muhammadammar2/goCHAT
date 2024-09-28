@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import apiClient from "../../api/apiClient";
+import { useNavigate } from "react-router-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination } from "swiper/modules"; // Import modules from swiper/modules
 import "swiper/css";
@@ -10,6 +11,9 @@ import "./styles.css";
 function JoinRoom() {
   const [rooms, setRooms] = useState<any[]>([]);
   const [error, setError] = useState("");
+  const [code, setCode] = useState("");
+  const [selectedRoom, setSelectedRoom] = useState<any>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     async function fetchRooms() {
@@ -17,16 +21,13 @@ function JoinRoom() {
         const response = await apiClient.get("/rooms");
         console.log("Fetched rooms:", response.data);
 
-        // Sort rooms by CreatedAt timestamp (newest first)
         const sortedRooms = response.data.sort((a: any, b: any) => {
           return (
             new Date(b.CreatedAt).getTime() - new Date(a.CreatedAt).getTime()
           );
         });
 
-        // Limit to the 7 most recent rooms
         const recentRooms = sortedRooms.slice(0, 7);
-
         setRooms(recentRooms);
         console.log("Recent rooms:", recentRooms);
       } catch (err: any) {
@@ -37,13 +38,29 @@ function JoinRoom() {
     fetchRooms();
   }, []);
 
+  const handleJoinRoom = (room: any) => {
+    setSelectedRoom(room);
+    if (room.room_type === "public") {
+      navigate("/profile");
+    } else {
+      setCode("");
+      console.log("Selected Room:", room); // Log the selected room
+    }
+  };
+
+  const handleCodeSubmit = () => {
+    console.log("Entered Code:", code);
+    console.log("Expected Code:", selectedRoom?.code); // Check if this is correctly defined
+    if (code === selectedRoom?.code) {
+      navigate("/profile");
+    } else {
+      setError("Wrong code. Please try again.");
+    }
+  };
+
   return (
     <div className="w-full max-w-xl mx-auto">
-      {" "}
-      {/* Increased max width for more space */}
       <div className="bg-gray-900 rounded-lg p-8 shadow-xl">
-        {" "}
-        {/* Increased padding and shadow */}
         <h2 className="text-3xl mb-6 text-center font-bold text-blue-400">
           Join a Room
         </h2>
@@ -52,27 +69,45 @@ function JoinRoom() {
           <Swiper
             spaceBetween={40}
             slidesPerView={1}
-            navigation={true} // Enable navigation
-            pagination={{ clickable: true }} // Enable pagination
-            modules={[Navigation, Pagination]} // Register Swiper modules
+            navigation={true}
+            pagination={{ clickable: true }}
+            modules={[Navigation, Pagination]}
           >
             {rooms.map((room: any) => (
               <SwiperSlide key={room.id}>
                 <div className="bg-gray-800 p-8 rounded-lg shadow-lg">
                   <h3 className="text-2xl font-bold text-white">{room.name}</h3>
-                  <p className="text-gray-300 mt-2">{room.description}</p>{" "}
-                  {/* Added margin for better spacing */}
+                  <p className="text-gray-300 mt-2">{room.description}</p>
                   <p className="text-gray-400 mt-1">
                     Type: {room.room_type === "private" ? "Private" : "Public"}
                   </p>
                   <p className="text-gray-500 mt-1">
                     Created At: {new Date(room.CreatedAt).toLocaleString()}
                   </p>
-                  <button className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded mt-6">
-                    {" "}
-                    {/* Larger button */}
+                  <button
+                    className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded mt-6"
+                    onClick={() => handleJoinRoom(room)}
+                  >
                     Join Room
                   </button>
+                  {selectedRoom?.id === room.id &&
+                    room.room_type === "private" && (
+                      <div className="mt-4">
+                        <input
+                          type="text"
+                          placeholder="Enter room code"
+                          value={code}
+                          onChange={(e) => setCode(e.target.value)}
+                          className="border border-gray-400 p-2 rounded w-full bg-gray-800 text-white"
+                        />
+                        <button
+                          onClick={handleCodeSubmit}
+                          className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mt-2"
+                        >
+                          Submit Code
+                        </button>
+                      </div>
+                    )}
                 </div>
               </SwiperSlide>
             ))}
