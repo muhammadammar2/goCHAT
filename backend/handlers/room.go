@@ -29,7 +29,7 @@ func CreateRoom(db *gorm.DB) echo.HandlerFunc {
             Name:        req.Name,
             Description: req.Description,
             RoomType:    req.RoomType,
-            OwnerID:     userID,  
+            OwnerID:     userID,
         }
 
 		if req.RoomType == "private" && req.RoomCode == "" {

@@ -52,11 +52,13 @@ function CreateRoomForm() {
 
     console.log("Creating room with token:", token);
 
+    // const userId = token ? JSON.parse(atob(token.split(".")[1])).user_id : null;
     const roomData = {
       name,
       description,
       room_type: isPrivate ? "private" : "public",
       room_code: isPrivate ? code : undefined,
+      // owner_id: userId,
     };
 
     try {
