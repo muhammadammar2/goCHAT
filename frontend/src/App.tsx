@@ -14,6 +14,7 @@ import JoinRoom from "./components/rooms/JoinRoom";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { AuthProvider, useAuth } from "./auth/AuthContext";
 import ProfilePage from "./components/ProfilePage";
+import Chat from "./components/Messages/Chat";
 
 function App() {
   return (
@@ -69,6 +70,7 @@ function AppContent() {
               <Route path="/create-room" element={<CreateRoomForm />} />
               <Route path="/join-room" element={<JoinRoom />} />
               <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/chat" element={<Chat />} /> {/* Added chat route */}
             </Route>
           </Routes>
         </div>
