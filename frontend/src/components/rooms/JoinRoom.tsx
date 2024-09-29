@@ -48,13 +48,39 @@ function JoinRoom() {
     }
   };
 
-  const handleCodeSubmit = () => {
-    console.log("Entered Code:", code);
-    console.log("Expected Code:", selectedRoom?.code); // Check if this is correctly defined
-    if (code === selectedRoom?.code) {
-      navigate("/profile");
-    } else {
-      setError("Wrong code. Please try again.");
+  const handleCodeSubmit = async () => {
+    try {
+      console.log("Entered Code:", code);
+
+      // Send the room_id and code to the backend to verify
+      const response = await apiClient.post("/join-room", {
+        room_id: selectedRoom?.id,
+        code: code,
+      });
+
+      console.log("Response from backend:", response.data);
+
+      // Check if the response is successful before navigating
+      if (
+        response.status === 200 &&
+        response.data.message === "Successfully joined the room"
+      ) {
+        console.log("Room joined successfully. Navigating...");
+        navigate("/profile");
+      } else {
+        console.log("Failed to join the room.");
+        setError("Unable to join the room. Please try again.");
+      }
+    } catch (error: any) {
+      // Handle the error
+      console.error("Error from API:", error);
+
+      // Check if error is due to wrong code
+      if (error.response && error.response.status === 403) {
+        setError("Wrong code. Please try again.");
+      } else {
+        setError("An unexpected error occurred. Please try again.");
+      }
     }
   };
 

@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/labstack/echo"
@@ -57,6 +58,30 @@ func GetRooms(db *gorm.DB) echo.HandlerFunc {
 }
 
 
+// func JoinRoom(db *gorm.DB) echo.HandlerFunc {
+//     return func(c echo.Context) error {
+//         var req struct {
+//             RoomID string `json:"room_id"`
+//             Code   string `json:"code,omitempty"` 
+//         }
+//         if err := c.Bind(&req); err != nil {
+//             return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request"})
+//         }
+
+//         var room models.Room
+//         if err := db.First(&room, req.RoomID).Error; err != nil {
+//             return c.JSON(http.StatusNotFound, map[string]string{"error": "Room not found"})
+//         }
+
+//         if room.RoomType == "private" && room.RoomCode != req.Code {
+//             return c.JSON(http.StatusForbidden, map[string]string{"error": "Invalid code for private room"})
+//         }
+
+//         return c.JSON(http.StatusOK, map[string]string{"message": "Successfully joined the room"})
+//     }
+// }
+
+
 func JoinRoom(db *gorm.DB) echo.HandlerFunc {
     return func(c echo.Context) error {
         var req struct {
@@ -67,14 +92,18 @@ func JoinRoom(db *gorm.DB) echo.HandlerFunc {
             return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request"})
         }
 
+        fmt.Println("Received RoomID:", req.RoomID)
         var room models.Room
         if err := db.First(&room, req.RoomID).Error; err != nil {
+            fmt.Println("fetching failed")
             return c.JSON(http.StatusNotFound, map[string]string{"error": "Room not found"})
         }
 
-        if room.RoomType == "private" && room.RoomCode != req.Code {
-            return c.JSON(http.StatusForbidden, map[string]string{"error": "Invalid code for private room"})
-        }
+        fmt.Printf("Fetched Room: %+v\n", room) // Log the fetched room details
+            if room.RoomType == "private" && room.RoomCode != req.Code {
+                fmt.Println("Expected code:", room.RoomCode , "Recieved code :" , req.Code) 
+                    return c.JSON(http.StatusForbidden, map[string]string{"error": "Invalid code for private room"})
+                }
 
         return c.JSON(http.StatusOK, map[string]string{"message": "Successfully joined the room"})
     }
