@@ -1,0 +1,56 @@
+.messaging-page {
+  display: flex;
+  justify-content: space-between;
+  height: 100vh;
+}
+
+.user-list {
+  width: 30%;
+  border-right: 1px solid #ccc;
+  padding: 10px;
+}
+
+.user-list ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.user-list li {
+  cursor: pointer;
+  padding: 8px;
+  border-bottom: 1px solid #eee;
+}
+
+.user-list li:hover {
+  background-color: #f0f0f0;
+}
+
+.chat-window {
+  width: 70%;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+.messages {
+  flex-grow: 1;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+.message {
+  padding: 5px;
+  margin: 5px 0;
+  border-radius: 4px;
+}
+
+.sent {
+  background-color: #d1ffd1; /* Green for sent messages */
+  align-self: flex-end;
+}
+
+.received {
+  background-color: #f1f1f1; /* Gray for received messages */
+}

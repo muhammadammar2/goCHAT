@@ -32,4 +32,6 @@ func SetupRoutes(e *echo.Echo, db *gorm.DB) {
 	r.GET("/rooms", handlers.GetRooms(db))         
     r.POST("/join-room", handlers.JoinRoom(db)) 
 
+	e.GET("/ws", handlers.WebSocketHandler)
+
 }
