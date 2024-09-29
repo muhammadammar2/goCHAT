@@ -24,6 +24,8 @@ func SetupRoutes(e *echo.Echo, db *gorm.DB) {
 	r.Use(middlewares.BlacklistMiddleware(redis.RedisClient))
 
 
+	
+
 	// r.PUT("/update-profile", handlers.UpdateProfile(db))
     r.POST("/create-room", handlers.CreateRoom(db))
     // r.GET("/profile", handlers.GetUserProfile(db)) 
@@ -33,5 +35,6 @@ func SetupRoutes(e *echo.Echo, db *gorm.DB) {
     r.POST("/join-room", handlers.JoinRoom(db)) 
 
 	e.GET("/ws", handlers.WebSocketHandler)
+
 
 }
