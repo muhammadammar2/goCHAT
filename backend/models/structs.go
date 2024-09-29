@@ -18,3 +18,8 @@ type CreateRoomRequest struct {
 	RoomType    string `json:"room_type" validate:"required,oneof=public private"`
 	RoomCode    string `json:"room_code,omitempty"`
 }
+
+type JoinRoomRequest struct {
+	RoomID uint   `json:"room_id"`
+	Code   string `json:"code,omitempty"`
+}

@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/labstack/echo"
@@ -58,10 +57,7 @@ func GetRooms(db *gorm.DB) echo.HandlerFunc {
 }
 func JoinRoom(db *gorm.DB) echo.HandlerFunc {
     return func(c echo.Context) error {
-        var req struct {
-            RoomID uint   `json:"room_id"` 
-            Code   string `json:"code,omitempty"`
-        }
+        var req models.JoinRoomRequest
 
         if err := c.Bind(&req); err != nil {
             return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request"})
@@ -69,11 +65,8 @@ func JoinRoom(db *gorm.DB) echo.HandlerFunc {
 
         var room models.Room
         if err := db.First(&room, req.RoomID).Error; err != nil {
-            fmt.Println("Fetching room with ID:", req.RoomID)
             return c.JSON(http.StatusNotFound, map[string]string{"error": "Room not found"})
         }
-
-        fmt.Println("Fetched Room:", room)
 
         if room.RoomType == "private" {
             if req.Code == "" {
@@ -81,7 +74,6 @@ func JoinRoom(db *gorm.DB) echo.HandlerFunc {
             }
 
             if room.RoomCode != req.Code {
-                fmt.Println("Expected code:", room.RoomCode, "Received code:", req.Code)
                 return c.JSON(http.StatusForbidden, map[string]string{"error": "Invalid code for private room"})
             }
         }

@@ -19,7 +19,6 @@ function JoinRoom() {
     async function fetchRooms() {
       try {
         const response = await apiClient.get("/rooms");
-        console.log("Fetched rooms:", response.data);
 
         const sortedRooms = response.data.sort((a: any, b: any) => {
           return (
@@ -29,7 +28,6 @@ function JoinRoom() {
 
         const recentRooms = sortedRooms.slice(0, 7);
         setRooms(recentRooms);
-        console.log("Recent rooms:", recentRooms);
       } catch (err: any) {
         console.error(err.response?.data || err.message);
         setError("Failed to fetch rooms. Please try again.");
@@ -39,13 +37,11 @@ function JoinRoom() {
   }, []);
 
   const handleJoinRoom = (room: any) => {
-    console.log("Joining Room:", room);
     setSelectedRoom(room);
     if (room.room_type === "public") {
       navigate("/profile");
     } else {
       setCode("");
-      console.log("Selected Room for private:", room);
     }
   };
 
@@ -61,29 +57,17 @@ function JoinRoom() {
         return;
       }
 
-      console.log("Entered Code:", code);
-      console.log(
-        "Sending request with room_id:",
-        selectedRoom.ID,
-        "and code:",
-        code
-      );
-
       const response = await apiClient.post("/join-room", {
         room_id: selectedRoom.ID,
         code: code,
       });
 
-      console.log("Response from backend:", response.data);
-
       if (
         response.status === 200 &&
         response.data.message === "Successfully joined the room"
       ) {
-        console.log("Room joined successfully. Navigating...");
         navigate("/profile");
       } else {
-        console.log("Failed to join the room.");
         setError("Unable to join the room. Please try again.");
       }
     } catch (error: any) {
@@ -126,7 +110,7 @@ function JoinRoom() {
                     className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded mt-6"
                     onClick={() => handleJoinRoom(room)}
                   >
-                    Join Room
+                    Select Room
                   </button>
                   {selectedRoom?.id === room.id &&
                     room.room_type === "private" && (
