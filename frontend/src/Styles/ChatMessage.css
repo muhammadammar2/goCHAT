@@ -1,0 +1,26 @@
+.chat-message {
+  background-color: #3c3f41; /* Darker message background */
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.message-header {
+  display: flex;
+  justify-content: space-between;
+  font-weight: bold;
+}
+
+.message-sender {
+  color: #007bff; /* Link color for sender */
+}
+
+.message-timestamp {
+  color: #cccccc; /* Lighter color for timestamp */
+}
+
+.message-content {
+  margin-top: 5px;
+  font-size: 14px;
+}
