@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import apiClient from "../../api/apiClient";
 import { useNavigate } from "react-router-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation, Pagination } from "swiper/modules"; // Import modules from swiper/modules
+import { Navigation, Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
@@ -39,28 +39,43 @@ function JoinRoom() {
   }, []);
 
   const handleJoinRoom = (room: any) => {
+    console.log("Joining Room:", room);
     setSelectedRoom(room);
     if (room.room_type === "public") {
       navigate("/profile");
     } else {
       setCode("");
-      console.log("Selected Room:", room); // Log the selected room
+      console.log("Selected Room for private:", room);
     }
   };
 
   const handleCodeSubmit = async () => {
     try {
-      console.log("Entered Code:", code);
+      if (!selectedRoom) {
+        setError("No room selected.");
+        return;
+      }
 
-      // Send the room_id and code to the backend to verify
+      if (selectedRoom.room_type === "private" && !code) {
+        setError("Code is required for private room.");
+        return;
+      }
+
+      console.log("Entered Code:", code);
+      console.log(
+        "Sending request with room_id:",
+        selectedRoom.ID,
+        "and code:",
+        code
+      );
+
       const response = await apiClient.post("/join-room", {
-        room_id: selectedRoom?.id,
+        room_id: selectedRoom.ID,
         code: code,
       });
 
       console.log("Response from backend:", response.data);
 
-      // Check if the response is successful before navigating
       if (
         response.status === 200 &&
         response.data.message === "Successfully joined the room"
@@ -72,10 +87,7 @@ function JoinRoom() {
         setError("Unable to join the room. Please try again.");
       }
     } catch (error: any) {
-      // Handle the error
       console.error("Error from API:", error);
-
-      // Check if error is due to wrong code
       if (error.response && error.response.status === 403) {
         setError("Wrong code. Please try again.");
       } else {
