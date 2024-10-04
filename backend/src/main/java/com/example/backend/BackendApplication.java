@@ -1,13 +1,13 @@
-package com.example.goCHAT_backend;
+package com.example.backend;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class GoChatBackendApplication {
+public class BackendApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(GoChatBackendApplication.class, args);
+		SpringApplication.run(BackendApplication.class, args);
 	}
 
 }
