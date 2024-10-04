@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "users") // Ensure the table name matches your database
+@Table(name = "users")
 public class User {
 
     @Id
@@ -23,9 +23,8 @@ public class User {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    // Constructors
     public User() {
-        // Default constructor
+        // default constructor
     }
 
     public User(String firstName, String lastName, String email, String username, String password) {
@@ -38,7 +37,6 @@ public class User {
         this.updatedAt = LocalDateTime.now();
     }
 
-    // Getters and Setters
     public Long getId() {
         return id;
     }
