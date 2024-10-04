@@ -32,19 +32,19 @@ public class UserService implements UserDetailsService{
         userRepository.save(user);;
     }
 
-    public User authenticate (String username , String password) throws Exception {
-        User user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new Exception("User not found.");
-        }
-        if (!passwordEncoder.matches(password, user.getPassword())) {
-            throw new Exception("Invalid username or password.");
-        }
-        return user;
-    }
-    public User findByUsername(String username) {
-        return userRepository.findByUsername(username);
-    }
+    // public User authenticate (String username , String password) throws Exception {
+    //     User user = userRepository.findByUsername(username);
+    //     if (user == null) {
+    //         throw new Exception("User not found.");
+    //     }
+    //     if (!passwordEncoder.matches(password, user.getPassword())) {
+    //         throw new Exception("Invalid username or password.");
+    //     }
+    //     return user;
+    // }
+    // public User findByUsername(String username) {
+    //     return userRepository.findByUsername(username);
+    // }
 
     @Override
     public UserDetails loadUserByUsername (String username) throws UsernameNotFoundException {
@@ -57,5 +57,9 @@ public class UserService implements UserDetailsService{
                 .password(user.getPassword())
                 .roles("USER") // set roles here as needed
                 .build();
+    }
+    public User findUserByUsername (String username) {
+        UserDetails userDetails = loadUserByUsername(username);
+        return userRepository.findByUsername(userDetails.getUsername());
     }
 }

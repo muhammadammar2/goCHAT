@@ -43,7 +43,7 @@ public class UserController {
                 new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword())
             );
 
-            User user = userService.findByUsername(loginRequest.getUsername());
+            User user = userService.findUserByUsername(loginRequest.getUsername());
 
             String token = jwtUtil.generateToken(user); 
             return ResponseEntity.ok(token);

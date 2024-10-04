@@ -10,7 +10,7 @@ import java.util.Date;
 public class JwtUtil {
 
     
-    private final String SECRET_KEY = "your-secret-key";
+    private final String SECRET_KEY = "q4w8fT9gH3jS8pL2dV9eM6xB2nV7zY6pG4cJ2qE8tU1wR5sX0nK3fR9jB7vF2mN9";
 
     private final long EXPIRATION_TIME = 86400000; 
 
