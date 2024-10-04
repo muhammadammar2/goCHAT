@@ -2,12 +2,17 @@ package com.example.backend.entities;
 
 import jakarta.persistence.*;
 import lombok.Data;
-
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
+@Table(name = "users")
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class User {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -16,22 +21,21 @@ public class User {
     private String lastName;
     private String email;
     private String username;
-    private String password;
+    private String password; // This will be hashed
 
-    @Column (name = "created_at" , updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @Column (name = "updated_at")
-    private LocalDateTime updatedTime;
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 
     @PrePersist
-    protected  void onCreate() {
-        createdAt = LocalDateTime.now();
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
     }
 
     @PreUpdate
     protected void onUpdate() {
-        updatedTime = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
     }
-
 }
