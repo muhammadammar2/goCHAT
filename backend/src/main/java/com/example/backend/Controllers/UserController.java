@@ -45,6 +45,10 @@ public class UserController {
 
             User user = userService.findUserByUsername(loginRequest.getUsername());
 
+            if (user == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username || password");
+            }
+
             String token = jwtUtil.generateToken(user); 
             return ResponseEntity.ok(token);
         } catch (BadCredentialsException e) {
@@ -53,4 +57,6 @@ public class UserController {
             return ResponseEntity.badRequest().body("Login Failed: " + e.getMessage());
         } 
     }
+
+
 }

@@ -59,7 +59,7 @@ public class UserService implements UserDetailsService{
                 .build();
     }
     public User findUserByUsername (String username) {
-        UserDetails userDetails = loadUserByUsername(username);
-        return userRepository.findByUsername(userDetails.getUsername());
+        // UserDetails userDetails = loadUserByUsername(username);
+        return userRepository.findByUsername(username);
     }
 }
