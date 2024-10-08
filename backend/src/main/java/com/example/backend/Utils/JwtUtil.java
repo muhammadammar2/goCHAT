@@ -1,7 +1,9 @@
 package com.example.backend.Utils;
-import com.example.backend.entities.User;
+// import com.example.backend.entities.User;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -14,10 +16,10 @@ public class JwtUtil {
 
     private final long EXPIRATION_TIME = 86400000; 
 
-    public String generateToken(User user) {
+    public String generateToken(UserDetails userDetails) {
         long now = System.currentTimeMillis();
         return Jwts.builder()
-                .setSubject(user.getUsername())
+                .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(now))
                 .setExpiration(new Date(now + EXPIRATION_TIME))
                 .signWith(SignatureAlgorithm.HS512, SECRET_KEY)
