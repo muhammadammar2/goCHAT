@@ -105,26 +105,24 @@ public class UserService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        // Use the username for loading user details
         User user = userRepository.findByUsername(username);
         if (user == null) {
             throw new UsernameNotFoundException("User not found");
         }
         return org.springframework.security.core.userdetails.User
-                .withUsername(user.getUsername()) // Use username
+                .withUsername(user.getUsername()) 
                 .password(user.getPassword())
-                .roles("USER") // roles
+                .roles("USER") 
                 .build();
     }
 
-    // Add this method to load user by email
     public UserDetails loadUserByEmail(String email) throws UsernameNotFoundException {
         User user = userRepository.findByEmail(email);
         if (user == null) {
             throw new UsernameNotFoundException("User not found");
         }
         return org.springframework.security.core.userdetails.User
-                .withUsername(user.getEmail()) // or user.getUsername() based on your preference
+                .withUsername(user.getEmail()) 
                 .password(user.getPassword())
                 .roles("USER") // roles
                 .build();
@@ -132,10 +130,10 @@ public class UserService implements UserDetailsService {
 
     public String authenticateAndGenerateToken(String email, String password) throws Exception {
         System.out.println("Authenticating user: " + email);
-        UserDetails userDetails = loadUserByEmail(email); // Load by email
+        UserDetails userDetails = loadUserByEmail(email); 
 
         if (!passwordEncoder.matches(password, userDetails.getPassword())) {
-            throw new Exception("Invalid credentials"); // Change message for clarity
+            throw new Exception("Invalid credentials"); 
         }
         return jwtUtil.generateToken(userDetails);
     }
