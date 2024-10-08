@@ -3,7 +3,7 @@ import useWebSocket from "../../hooks/useWebSocket";
 
 const ChatInput: React.FC = () => {
   const [inputValue, setInputValue] = useState("");
-  const socket = useWebSocket("ws://localhost:6969/ws");
+  const socket = useWebSocket("ws://localhost:8080/ws");
 
   const handleSendMessage = () => {
     if (inputValue.trim() && socket) {

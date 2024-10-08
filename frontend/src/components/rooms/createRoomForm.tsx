@@ -34,7 +34,7 @@ function CreateRoomForm() {
     try {
       console.log("Sending request to create room with data:", roomData);
 
-      const response = await fetch("http://localhost:6969/create-room", {
+      const response = await fetch("http://localhost:8080/create-room", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -4,7 +4,7 @@ const useWebSocket = (url: string) => {
   const socketRef = useRef<WebSocket | null>(null);
 
   useEffect(() => {
-    socketRef.current = new WebSocket("ws://localhost:6969/ws");
+    socketRef.current = new WebSocket("ws://localhost:8080/ws");
 
     socketRef.current.onopen = () => {
       console.log("WebSocket connection established");
