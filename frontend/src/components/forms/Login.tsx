@@ -15,7 +15,7 @@ function Login() {
 
     try {
       const response = await apiClient.post("/login", { email, password });
-      const { token } = response.data;
+      const { token } = response.data.tolen || response.data;
 
       if (token) {
         localStorage.setItem("token", token);

@@ -11,7 +11,7 @@ const apiClient = axios.create({
 
 apiClient.interceptors.request.use(
   (config) => {
-    console.log("Outgoing request config (before attaching token):", config);
+    // console.log("Outgoing request config (before attaching token):", config);
 
     const token = localStorage.getItem("token");
     if (token) {
@@ -21,7 +21,7 @@ apiClient.interceptors.request.use(
       console.log("No token found in localStorage");
     }
 
-    console.log("Final request config:", config);
+    // console.log("Final request config:", config);
     return config;
   },
   (error) => {
