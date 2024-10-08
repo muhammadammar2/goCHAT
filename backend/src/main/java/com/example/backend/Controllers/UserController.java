@@ -3,6 +3,9 @@ package com.example.backend.Controllers;
 import com.example.backend.Services.UserService;
 import com.example.backend.dto.LoginRequest;
 import com.example.backend.entities.User;
+
+import java.util.Collections; 
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,17 +33,17 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> loginUser(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<?> loginUser(@RequestBody LoginRequest loginRequest) { 
         System.out.println("Received login request: " + loginRequest);
         try {
             String token = userService.authenticateAndGenerateToken(loginRequest.getEmail(), loginRequest.getPassword());
-            return ResponseEntity.ok(token);
+            System.out.println("The token is: " + token);
+
+            return ResponseEntity.ok(Collections.singletonMap("token", token)); 
         } catch (BadCredentialsException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username || password");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Login Failed: " + e.getMessage());
         } 
     }
-
-
 }
