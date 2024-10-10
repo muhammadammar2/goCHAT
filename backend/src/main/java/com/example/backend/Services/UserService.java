@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.backend.Repositories.UserRepository;
 import com.example.backend.Utils.JwtUtil;
+import com.example.backend.dto.UserInfoDTO;
 import com.example.backend.entities.User;
 
 @Service
@@ -77,10 +78,20 @@ public class UserService implements UserDetailsService {
         return userRepository.findByUsername(username);
     }
 
-    public User getUserInfo() {
+    public UserInfoDTO getUserInfo() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        
         String email = authentication.getName();
+        System.out.println("Authenticated User: " + authentication.getName());
+        System.out.println("Authorities: " + authentication.getAuthorities());  
 
-        return userRepository.findByEmail(email);
+        User user = userRepository.findByEmail(email);
+
+        if(user != null) {
+            return new UserInfoDTO(user.getEmail(), user.getUsername(), user.getFirstName(), user.getLastName());
+        } else {
+            throw new UsernameNotFoundException("User not found with this email: " + email);
+        }
+
     }
 }

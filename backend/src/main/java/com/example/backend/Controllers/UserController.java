@@ -2,6 +2,7 @@ package com.example.backend.Controllers;
 
 import com.example.backend.Services.UserService;
 import com.example.backend.dto.LoginRequest;
+import com.example.backend.dto.UserInfoDTO;
 import com.example.backend.entities.User;
 
 import java.util.Collections; 
@@ -50,9 +51,10 @@ public class UserController {
 
     }
 
-    @PreAuthorize("isAuthenticated()")
     @GetMapping("/info")
-    public User getUserInfo () {
+    @PreAuthorize("isAuthenticated()")
+
+    public UserInfoDTO getUserInfo () {
         return userService.getUserInfo();
     }
 }
