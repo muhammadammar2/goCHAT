@@ -12,7 +12,6 @@ function Login() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // localStorage.removeItem("token");
 
     try {
       const response = await apiClient.post("/login", { email, password });
@@ -22,9 +21,13 @@ function Login() {
       console.log("Token received from backend:", token);
 
       if (token) {
+        localStorage.removeItem("token");
         localStorage.setItem("token", token);
-        console.log("i am the token of handleSubmit", token);
+
+        console.log("Stored token in localStorage:", token);
+
         login();
+
         navigate("/room-options");
       } else {
         throw new Error("Login failed. Token not received.");
